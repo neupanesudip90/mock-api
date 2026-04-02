@@ -1,0 +1,76 @@
+backend/
+├── 📁 prisma/                  # (If using Prisma ORM - Recommended)
+│   ├── schema.prisma          # Database schema definition
+│   └── seed.ts                # Optional: Script to seed dummy data
+├── 📁 src/
+│   ├── 📁 config/             # Configuration & Connections
+│   │   ├── database.ts        # DB connection setup
+│   │   ├── redis.ts           # Redis client setup
+│   │   └── env.ts             # Zod-validated environment variables
+│   │
+│   ├── 📁 controllers/        # Request/Response handling (Thin layer)
+│   │   ├── auth.controller.ts
+│   │   ├── project.controller.ts
+│   │   ├── endpoint.controller.ts
+│   │   └── mock.controller.ts # Handles the dynamic mock responses
+│   │
+│   ├── 📁 middlewares/        # Reusable middleware
+│   │   ├── auth.middleware.ts       # JWT verification
+│   │   ├── validate.middleware.ts   # Zod validation wrapper
+│   │   ├── rateLimiter.middleware.ts# Redis rate limiting logic
+│   │   ├── cache.middleware.ts      # Cache lookup/invalidation
+│   │   ├── error.middleware.ts      # Centralized error handler
+│   │   └── logger.middleware.ts     # Request logging
+│   │
+│   ├── 📁 routes/             # Route definitions
+│   │   ├── index.ts           # Aggregates all routes
+│   │   ├── auth.routes.ts
+│   │   ├── project.routes.ts
+│   │   ├── endpoint.routes.ts
+│   │   └── mock.routes.ts     # Catch-all route: /mock/:projectId/*
+│   │
+│   ├── 📁 services/           # Business Logic (The "Brain")
+│   │   ├── auth.service.ts
+│   │   ├── project.service.ts
+│   │   ├── endpoint.service.ts
+│   │   ├── mock.service.ts    # Generates mock data from schema
+│   │   ├── rateLimit.service.ts # Abstracts Redis rate limit algo
+│   │   └── analytics.service.ts # Logs usage to DB
+│   │
+│   ├── 📁 repositories/       # Data Access Layer
+│   │   ├── base.repo.ts       # Optional: Generic repo methods
+│   │   ├── user.repo.ts
+│   │   ├── project.repo.ts
+│   │   └── endpoint.repo.ts
+│   │
+│   ├── 📁 validations/        # Zod Schemas
+│   │   ├── auth.schema.ts
+│   │   ├── project.schema.ts
+│   │   ├── endpoint.schema.ts
+│   │   └── mock.schema.ts     # Validates user-defined mock schemas
+│   │
+│   ├── 📁 types/              # TypeScript Interfaces
+│   │   ├── express.d.ts       # Extend Express Request types
+│   │   ├── api.types.ts       # Shared DTOs/Response types
+│   │   └── database.types.ts  # Generated or custom DB types
+│   │
+│   ├── 📁 utils/              # Helper functions
+│   │   ├── logger.ts          # Winston/Pino logger setup
+│   │   ├── apiError.ts        # Custom Error class
+│   │   ├── catchAsync.ts      # Wrapper for async route handlers
+│   │   └── mockGenerator.ts   # Helper to map Zod/Faker to data
+│   │
+│   ├── app.ts                 # Express app configuration
+│   └── server.ts              # Entry point (starts server)
+│
+├── 📁 tests/                  # Jest/Vitest tests
+│   ├── unit/
+│   ├── integration/
+│   └── setup.ts
+│
+├── 🐳 Dockerfile
+├── 🐳 docker-compose.yml
+├── 📄 .env.example
+├── 📄 package.json
+├── 📄 tsconfig.json
+└── 📄 README.md
