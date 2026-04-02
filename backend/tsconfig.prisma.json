@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node10",
+    "esModuleInterop": true,
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["prisma.config.ts"]
+}
