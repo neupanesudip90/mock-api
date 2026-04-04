@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../src/generated"
    moduleFormat = "commonjs" 
 }
 
@@ -37,14 +37,42 @@ enum RateLimitStrategy {
 
 //models
 model User{
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
+  id                       String    @id @default(cuid())
+  email                    String    @unique
+  password                 String
+  name                     String?
+  emailVerified            Boolean   @default(false)
+  emailVerificationToken   String?   @unique
+  emailVerificationExpiry  DateTime?
+  passwordResetToken       String?   @unique
+  passwordResetExpiry      DateTime?
+  tokenVersion             Int       @default(0)
   projects  Project[]  // A user can have multiple projects. it is a one-to-many relationship   between user and project.project also a separate model in the database
+   otpCodes      OtpCode[]  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("users")  // Map to "users" table in the database
+}
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  userId    String
+  code      String
+  type      OtpType
+  expiresAt DateTime
+  usedAt    DateTime?  // null = not used yet
+  createdAt DateTime   @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([code, type])
+  @@map("otp_codes")
+}
+
+enum OtpType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
 }
 
 model Project{
@@ -86,7 +114,7 @@ model ApiKey {
   
   name      String   // e.g., "Production Key", "Dev Key"
   keyHash   String   @unique // 🔒 Store hash, never plain text
-  keyPrefix String?  // e.g., "sk_live_..." for UI display
+  keyPrefix String  // e.g., "sk_live_..." for UI display
   
   lastUsedAt DateTime?
   revoked    Boolean @default(false)

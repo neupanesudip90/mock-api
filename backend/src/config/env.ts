@@ -12,7 +12,16 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
   JWT_SECRET: z.string().min(32),
+  JWT_REFRESH_SECRET: z.string().min(32),
   API_KEY_PREFIX: z.string().default("mock_"),
+  ETHEREAL_EMAIL: z.string().email().optional(),
+  ETHEREAL_PASSWORD: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  EMAIL_FROM: z.string().email().optional(),
+  APP_URL: z.string().url(),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -5,14 +5,23 @@ import morgan from "morgan";
 import { errorMiddleware } from "@/middlewares/error.middleware";
 import { logger } from "@/utils/logger";
 import healthRoutes from "@/routes/health.routes";
+import mockRoutes from "@/routes/mock.routes";
+import authRoutes from "@/routes/auth.routes";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 // Security & Parsing
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.APP_URL,
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Logging
 app.use(
@@ -21,6 +30,8 @@ app.use(
 
 // Routes
 app.use("/api/health", healthRoutes);
+app.use("/mock", mockRoutes);
+app.use("/api/auth", authRoutes);
 
 // 404 Handler
 app.use((req, res) => {
