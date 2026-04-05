@@ -1,18 +1,16 @@
 import { prisma } from "@/config/database";
 import { ApiError } from "@/utils/ApiError";
+import { OtpType } from "../generated/client";
 import {
   hashPassword,
   verifyPassword,
   isStrongPassword,
 } from "@/utils/password.utils";
-import { generateApiKey, verifyApiKey } from "@/utils/apiKey.utils";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
   generateOTP,
-  getEmailVerificationExpiry,
-  getPasswordResetExpiry,
   getOTPExpiry,
 } from "@/utils/token.utils";
 import {
@@ -20,6 +18,7 @@ import {
   sendPasswordResetEmail,
   sendPasswordChangedEmail,
 } from "@/services/email.service";
+import { logger } from "@/utils/logger";
 import type {
   RegisterInput,
   LoginInput,
@@ -28,9 +27,6 @@ import type {
   ForgotPasswordInput,
   ResetPasswordInput,
   ChangePasswordInput,
-  ApiKeyInput,
-  ApiKeyResponse,
-  ApiKeyListItem,
 } from "@/types/auth.types";
 
 // ============================================================================
@@ -52,12 +48,10 @@ const buildAuthResponse = async (user: {
     email: user.email,
     tokenVersion: user.tokenVersion,
   });
-
   const tokens: AuthTokens = {
     accessToken,
-    expiresIn: 900, // 15 minutes in seconds
+    expiresIn: 900,
   };
-
   return {
     response: {
       user: {
@@ -68,7 +62,7 @@ const buildAuthResponse = async (user: {
       },
       tokens,
     },
-    refreshToken, // caller puts this in httpOnly cookie
+    refreshToken,
   };
 };
 
@@ -89,32 +83,42 @@ export const registerUser = async (
     where: { email: input.email.toLowerCase() },
   });
 
-  if (existing) {
+  if (existing)
     throw new ApiError(409, "An account with this email already exists");
-  }
 
   const hashedPassword = await hashPassword(input.password);
-  const otp = generateOTP();
-  const otpExpiry = getOTPExpiry();
-
 
   const user = await prisma.user.create({
     data: {
       email: input.email.toLowerCase(),
       password: hashedPassword,
       name: input.name ?? null,
-      emailVerificationToken: otp,
-      emailVerificationExpiry: otpExpiry,
       tokenVersion: 0,
     },
   });
 
-  // Send verification email (non-blocking — don't fail registration if email fails)
-  sendVerificationEmail(user.email, user.name, otp).catch(
-    (err) => {
-      console.error("Failed to send verification email:", err);
+  // Create OTP record
+  const otp = generateOTP();
+  await prisma.otpCode.create({
+    data: {
+      userId: user.id,
+      code: otp,
+      type: OtpType.EMAIL_VERIFICATION,
+      expiresAt: getOTPExpiry(),
     },
-  );
+  });
+
+  // Non-blocking — don't fail registration if email fails
+  // sendVerificationEmail(user.email, user.name, otp).catch((err) => {
+  //   logger.error(`Failed to send verification email: ${err.message}`);
+  // });
+  // In registerUser - temporarily await it to see the real error
+  try {
+    await sendVerificationEmail(user.email, user.name, otp);
+    logger.info("✅ Verification email sent successfully");
+  } catch (err: any) {
+    logger.error(`❌ Failed to send verification email:`, err); 
+  }
 
   return buildAuthResponse(user);
 };
@@ -122,27 +126,29 @@ export const registerUser = async (
 // ============================================================================
 // Email Verification
 // ============================================================================
-export const verifyEmail = async (token: string): Promise<void> => {
-  const user = await prisma.user.findFirst({
+export const verifyEmail = async (otp: string): Promise<void> => {
+  const otpRecord = await prisma.otpCode.findFirst({
     where: {
-      emailVerificationToken: token,
-      emailVerificationExpiry: { gt: new Date() },
-      emailVerified: false,
+      code: otp,
+      type: OtpType.EMAIL_VERIFICATION,
+      expiresAt: { gt: new Date() },
+      usedAt: null,
     },
   });
 
-  if (!user) {
-    throw new ApiError(400, "Invalid or expired verification token");
-  }
+  if (!otpRecord) throw new ApiError(400, "Invalid or expired OTP");
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      emailVerified: true,
-      emailVerificationToken: null,
-      emailVerificationExpiry: null,
-    },
-  });
+  // Mark OTP as used and verify user atomically
+  await prisma.$transaction([
+    prisma.otpCode.update({
+      where: { id: otpRecord.id },
+      data: { usedAt: new Date() },
+    }),
+    prisma.user.update({
+      where: { id: otpRecord.userId },
+      data: { emailVerified: true },
+    }),
+  ]);
 };
 
 // ============================================================================
@@ -153,17 +159,26 @@ export const resendVerificationEmail = async (email: string): Promise<void> => {
     where: { email: email.toLowerCase() },
   });
 
-  // Always respond the same — don't reveal if email exists
+  // Always silent — don't reveal if email exists
   if (!user || user.emailVerified) return;
 
-const otp = generateOTP();
-const otpExpiry = getOTPExpiry();
+  // Invalidate all previous unused OTPs
+  await prisma.otpCode.updateMany({
+    where: {
+      userId: user.id,
+      type: OtpType.EMAIL_VERIFICATION,
+      usedAt: null,
+    },
+    data: { usedAt: new Date() },
+  });
 
-  await prisma.user.update({
-    where: { id: user.id },
+  const otp = generateOTP();
+  await prisma.otpCode.create({
     data: {
-      emailVerificationToken: otp,
-      emailVerificationExpiry: otpExpiry,
+      userId: user.id,
+      code: otp,
+      type: OtpType.EMAIL_VERIFICATION,
+      expiresAt: getOTPExpiry(),
     },
   });
 
@@ -180,7 +195,6 @@ export const loginUser = async (
     where: { email: input.email.toLowerCase() },
   });
 
-  // Same error for wrong email OR wrong password — prevents enumeration
   if (!user || !(await verifyPassword(input.password, user.password))) {
     throw new ApiError(401, "Invalid email or password");
   }
@@ -200,11 +214,8 @@ export const refreshAccessToken = async (
     where: { id: payload.userId },
   });
 
-  if (!user) {
-    throw new ApiError(401, "User no longer exists");
-  }
+  if (!user) throw new ApiError(401, "User no longer exists");
 
-  // tokenVersion mismatch means user logged out — token is invalidated
   if (user.tokenVersion !== payload.tokenVersion) {
     throw new ApiError(401, "Token has been revoked. Please log in again.");
   }
@@ -218,10 +229,9 @@ export const refreshAccessToken = async (
 };
 
 // ============================================================================
-// Logout — invalidates ALL refresh tokens for this user
+// Logout
 // ============================================================================
 export const logoutUser = async (userId: string): Promise<void> => {
-  // Incrementing tokenVersion invalidates every existing refresh token
   await prisma.user.update({
     where: { id: userId },
     data: { tokenVersion: { increment: 1 } },
@@ -238,17 +248,25 @@ export const forgotPassword = async (
     where: { email: input.email.toLowerCase() },
   });
 
-  // Always return success — don't reveal if email exists
-  if (!user) return;
+  if (!user) return; // always silent
 
-const otp = generateOTP();
-const otpExpiry = getOTPExpiry();
+  // Invalidate previous reset OTPs
+  await prisma.otpCode.updateMany({
+    where: {
+      userId: user.id,
+      type: OtpType.PASSWORD_RESET,
+      usedAt: null,
+    },
+    data: { usedAt: new Date() },
+  });
 
-  await prisma.user.update({
-    where: { id: user.id },
+  const otp = generateOTP();
+  await prisma.otpCode.create({
     data: {
-      passwordResetToken: otp,
-      passwordResetExpiry: otpExpiry,
+      userId: user.id,
+      code: otp,
+      type: OtpType.PASSWORD_RESET,
+      expiresAt: getOTPExpiry(),
     },
   });
 
@@ -256,7 +274,7 @@ const otpExpiry = getOTPExpiry();
 };
 
 // ============================================================================
-// Reset Password (from forgot password flow)
+// Reset Password
 // ============================================================================
 export const resetPassword = async (
   input: ResetPasswordInput,
@@ -268,34 +286,41 @@ export const resetPassword = async (
     );
   }
 
-  const user = await prisma.user.findFirst({
+  const otpRecord = await prisma.otpCode.findFirst({
     where: {
-      passwordResetToken: input.token,
-      passwordResetExpiry: { gt: new Date() },
+      code: input.otp,
+      type: OtpType.PASSWORD_RESET,
+      expiresAt: { gt: new Date() },
+      usedAt: null,
     },
   });
 
-  if (!user) {
-    throw new ApiError(400, "Invalid or expired reset token");
-  }
+  if (!otpRecord) throw new ApiError(400, "Invalid or expired OTP");
 
   const hashedPassword = await hashPassword(input.newPassword);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      password: hashedPassword,
-      passwordResetToken: null,
-      passwordResetExpiry: null,
-      tokenVersion: { increment: 1 }, // invalidate all existing refresh tokens
-    },
-  });
+  await prisma.$transaction([
+    prisma.otpCode.update({
+      where: { id: otpRecord.id },
+      data: { usedAt: new Date() },
+    }),
+    prisma.user.update({
+      where: { id: otpRecord.userId },
+      data: {
+        password: hashedPassword,
+        tokenVersion: { increment: 1 },
+      },
+    }),
+  ]);
 
-  await sendPasswordChangedEmail(user.email, user.name);
+  const user = await prisma.user.findUnique({
+    where: { id: otpRecord.userId },
+  });
+  if (user) await sendPasswordChangedEmail(user.email, user.name);
 };
 
 // ============================================================================
-// Change Password (logged in user)
+// Change Password
 // ============================================================================
 export const changePassword = async (
   userId: string,
@@ -320,108 +345,9 @@ export const changePassword = async (
     where: { id: userId },
     data: {
       password: hashedPassword,
-      tokenVersion: { increment: 1 }, // log out all other sessions
+      tokenVersion: { increment: 1 },
     },
   });
 
   await sendPasswordChangedEmail(user.email, user.name);
-};
-
-// ============================================================================
-// API Key Management
-// ============================================================================
-export const createApiKey = async (
-  userId: string,
-  input: ApiKeyInput,
-): Promise<ApiKeyResponse> => {
-  const project = await prisma.project.findFirst({
-    where: { id: input.projectId, userId },
-  });
-
-  if (!project) {
-    throw new ApiError(403, "You do not have access to this project");
-  }
-
-  const { plainKey, keyHash, keyPrefix } = generateApiKey();
-
-  const apiKey = await prisma.apiKey.create({
-    data: {
-      projectId: input.projectId,
-      name: input.name,
-      keyHash,
-      keyPrefix,
-    },
-  });
-
-  return {
-    id: apiKey.id,
-    name: apiKey.name,
-    keyPrefix: apiKey.keyPrefix!,
-    plainKey, // ⚠️ Only returned here, never again
-    createdAt: apiKey.createdAt,
-  };
-};
-
-export const validateApiKey = async (
-  plainKey: string,
-): Promise<{ keyId: string; projectId: string; name: string } | null> => {
-  const keyPrefix = plainKey.slice(0, 12);
-
-  const candidates = await prisma.apiKey.findMany({
-    where: { keyPrefix, revoked: false },
-  });
-
-  for (const key of candidates) {
-    if (await verifyApiKey(plainKey, key.keyHash)) {
-      // Fire and forget — don't await, don't block the request
-      prisma.apiKey
-        .update({ where: { id: key.id }, data: { lastUsedAt: new Date() } })
-        .catch(() => {});
-
-      return { keyId: key.id, projectId: key.projectId, name: key.name };
-    }
-  }
-
-  return null;
-};
-
-export const revokeApiKey = async (
-  userId: string,
-  apiKeyId: string,
-): Promise<void> => {
-  const key = await prisma.apiKey.findFirst({
-    where: { id: apiKeyId, project: { userId } },
-  });
-
-  if (!key) throw new ApiError(404, "API key not found");
-
-  await prisma.apiKey.update({
-    where: { id: apiKeyId },
-    data: { revoked: true },
-  });
-};
-
-export const listApiKeys = async (
-  userId: string,
-  projectId: string,
-): Promise<ApiKeyListItem[]> => {
-  const project = await prisma.project.findFirst({
-    where: { id: projectId, userId },
-  });
-
-  if (!project)
-    throw new ApiError(403, "You do not have access to this project");
-
-  return prisma.apiKey.findMany({
-    where: { projectId },
-    select: {
-      id: true,
-      name: true,
-      keyPrefix: true,
-      createdAt: true,
-      lastUsedAt: true,
-      revoked: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
 };

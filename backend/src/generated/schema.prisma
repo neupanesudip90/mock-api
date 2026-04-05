@@ -37,17 +37,17 @@ enum OtpType {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String   @id @default(cuid())
+  email         String   @unique
   password      String
   name          String?
-  emailVerified Boolean   @default(false)
-  tokenVersion  Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  emailVerified Boolean  @default(false)
+  tokenVersion  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  projects      Project[]
-  otpCodes      OtpCode[]
+  projects Project[]
+  otpCodes OtpCode[]
 
   @@map("users")
 }
@@ -61,7 +61,7 @@ model OtpCode {
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type])
   @@index([code, type])
@@ -73,11 +73,11 @@ model Project {
   userId      String
   name        String
   description String?
-  status      ProjectStatus  @default(ACTIVE)
+  status      ProjectStatus @default(ACTIVE)
 
   defaultRateLimitMax      Int               @default(1000)
   defaultRateLimitWindow   Int               @default(60)
-  defaultRateLimitStrategy RateLimitStrategy  @default(FIXED_WINDOW)
+  defaultRateLimitStrategy RateLimitStrategy @default(FIXED_WINDOW)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -93,17 +93,17 @@ model Project {
 }
 
 model ApiKey {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   projectId  String
   name       String
   keyHash    String
   keyPrefix  String
   lastUsedAt DateTime?
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
-  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([keyPrefix])
@@ -118,13 +118,13 @@ model Endpoint {
   method    HttpMethod
 
   responseSchema Json
-  statusCode     Int   @default(200)
-  delayMs        Int   @default(0)
+  statusCode     Int  @default(200)
+  delayMs        Int  @default(0)
 
-  rateLimitEnabled  Boolean          @default(true)
+  rateLimitEnabled  Boolean           @default(true)
   rateLimitStrategy RateLimitStrategy @default(FIXED_WINDOW)
-  rateLimitMax      Int              @default(60)
-  rateLimitWindow   Int              @default(60)
+  rateLimitMax      Int               @default(60)
+  rateLimitWindow   Int               @default(60)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

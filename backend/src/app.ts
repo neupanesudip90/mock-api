@@ -8,6 +8,7 @@ import healthRoutes from "@/routes/health.routes";
 import mockRoutes from "@/routes/mock.routes";
 import authRoutes from "@/routes/auth.routes";
 import cookieParser from "cookie-parser";
+import projectRoutes from "./routes/project.routes";
 
 const app = express();
 
@@ -32,6 +33,10 @@ app.use(
 app.use("/api/health", healthRoutes);
 app.use("/mock", mockRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/auth", authRoutes);
+app.use("/projects", projectRoutes);
+
 
 // 404 Handler
 app.use((req, res) => {

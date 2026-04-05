@@ -29,10 +29,10 @@ declare global {
         projectId: string;
         name: string;
       };
+      validatedQuery?: unknown;
     }
   }
 }
-
 // ============================================================================
 // Auth Tokens
 // ============================================================================
@@ -87,24 +87,3 @@ export interface AuthResponse {
   tokens: AuthTokens;
 }
 
-export interface ApiKeyInput {
-  projectId: string;
-  name: string;
-}
-
-export interface ApiKeyResponse {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  plainKey: string; // ⚠️ Only shown once during creation
-  createdAt: Date;
-}
-
-export interface ApiKeyListItem {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  createdAt: Date;
-  lastUsedAt: Date | null;
-  revoked: boolean;
-}

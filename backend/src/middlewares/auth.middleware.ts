@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "@/utils/token.utils";
-import { validateApiKey } from "@/services/auth.service";
+import { validateApiKey } from "@/services/apiKey.service";
 import { ApiError } from "@/utils/ApiError";
 
 // Protects routes with JWT
