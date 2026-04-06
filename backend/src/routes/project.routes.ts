@@ -9,6 +9,8 @@ import {
   listProjectsSchema,
 } from "@/validators/project.validator";
 import apiKeyRoutes from "@/routes/apiKey.routes";
+import endpointRoutes from "@/routes/endpoint.routes";
+
 
 const router = Router();
 
@@ -48,5 +50,8 @@ router.delete(
 // Mount API Key routes under /projects/:projectId/api-keys
 // ============================================================================
 router.use("/:projectId/api-keys", apiKeyRoutes);
+
+router.use("/:projectId/endpoints", endpointRoutes);
+
 
 export default router;

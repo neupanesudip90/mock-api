@@ -31,11 +31,12 @@ app.use(
 
 // Routes
 app.use("/api/health", healthRoutes);
-app.use("/mock", mockRoutes);
+app.use("/api/mock", mockRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/auth", authRoutes);
 app.use("/projects", projectRoutes);
+
 
 
 // 404 Handler

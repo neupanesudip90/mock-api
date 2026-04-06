@@ -28,6 +28,21 @@ const formatEndpoint = (endpoint: any): EndpointResponse => ({
 });
 
 // ============================================================================
+// Validate Path Pattern
+// ============================================================================
+const validatePathPattern = (path: string): void => {
+  if (!path.startsWith("/")) {
+    throw new ApiError(400, "Path must start with /");
+  }
+
+  // Basic validation - you can enhance this
+  const invalidChars = /[^a-zA-Z0-9/_:-]/;
+  if (invalidChars.test(path.replace(/:\w+/g, ""))) {
+    throw new ApiError(400, "Path contains invalid characters");
+  }
+};
+
+// ============================================================================
 // Create Endpoint
 // ============================================================================
 export const createEndpoint = async (
@@ -37,6 +52,9 @@ export const createEndpoint = async (
 ): Promise<EndpointResponse> => {
   // Verify project ownership
   await verifyProjectOwnership(userId, projectId);
+
+  // Validate path
+  validatePathPattern(input.path);
 
   // Check for duplicate path+method
   const existing = await prisma.endpoint.findFirst({
@@ -145,6 +163,11 @@ export const updateEndpoint = async (
 
   if (!endpoint) {
     throw new ApiError(404, "Endpoint not found");
+  }
+
+  // Validate path if provided
+  if (input.path) {
+    validatePathPattern(input.path);
   }
 
   // Check for duplicate if path or method changed

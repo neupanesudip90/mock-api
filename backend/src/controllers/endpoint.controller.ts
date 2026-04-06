@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as endpointService from "@/services/endpoint.service";
 import { ApiError } from "@/utils/ApiError";
+import { catchAsync } from "@/utils/catchAsync";
 
 const getUserId = (req: Request): string => {
   if (!req.user?.userId) {
@@ -9,14 +10,10 @@ const getUserId = (req: Request): string => {
   return req.user.userId;
 };
 
-export const createEndpoint = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const createEndpoint = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
-    const { projectId } = req.params;
+   const { projectId } = req.params as { projectId: string; endpointId: string };
 
     const endpoint = await endpointService.createEndpoint(
       userId,
@@ -29,19 +26,13 @@ export const createEndpoint = async (
       data: endpoint,
       message: "Endpoint created successfully",
     });
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const listEndpoints = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const listEndpoints = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
-    const { projectId } = req.params;
+   const { projectId } = req.params as { projectId: string; endpointId: string };
 
     const result = await endpointService.listEndpoints(userId, projectId);
 
@@ -50,19 +41,16 @@ export const listEndpoints = async (
       data: result.endpoints,
       total: result.total,
     });
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const getEndpoint = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const getEndpoint = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
-    const { projectId, endpointId } = req.params;
+   const { projectId, endpointId } = req.params as {
+     projectId: string;
+     endpointId: string;
+   };
 
     const endpoint = await endpointService.getEndpoint(
       userId,
@@ -74,19 +62,16 @@ export const getEndpoint = async (
       success: true,
       data: endpoint,
     });
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const updateEndpoint = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const updateEndpoint = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
-    const { projectId, endpointId } = req.params;
+   const { projectId, endpointId } = req.params as {
+     projectId: string;
+     endpointId: string;
+   };
 
     const endpoint = await endpointService.updateEndpoint(
       userId,
@@ -100,24 +85,19 @@ export const updateEndpoint = async (
       data: endpoint,
       message: "Endpoint updated successfully",
     });
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const deleteEndpoint = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const deleteEndpoint = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
-    const { projectId, endpointId } = req.params;
+      const { projectId, endpointId } = req.params as {
+        projectId: string;
+        endpointId: string;
+      };
 
     await endpointService.deleteEndpoint(userId, projectId, endpointId);
 
     res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
