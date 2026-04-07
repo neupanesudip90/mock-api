@@ -10,6 +10,7 @@ import {
 } from "@/validators/project.validator";
 import apiKeyRoutes from "@/routes/apiKey.routes";
 import endpointRoutes from "@/routes/endpoint.routes";
+import analyticsRoutes from "@/routes/analytics.routes";
 
 
 const router = Router();
@@ -52,6 +53,7 @@ router.delete(
 router.use("/:projectId/api-keys", apiKeyRoutes);
 
 router.use("/:projectId/endpoints", endpointRoutes);
+router.use("/:projectId/analytics", analyticsRoutes);
 
 
 export default router;

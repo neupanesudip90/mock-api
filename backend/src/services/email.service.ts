@@ -14,7 +14,7 @@ export const sendVerificationEmail = async (
   otp: string,
 ): Promise<void> => {
   const displayName = name ?? email;
-  const transporter = getEmailTransporter();
+  const transporter = await getEmailTransporter();
 
   const info = await transporter.sendMail({
     from: FROM_ADDRESS,
@@ -50,7 +50,7 @@ export const sendPasswordResetEmail = async (
   otp: string,
 ): Promise<void> => {
   const displayName = name ?? email;
-  const transporter = getEmailTransporter();
+  const transporter = await getEmailTransporter();
 
   const info = await transporter.sendMail({
     from: FROM_ADDRESS,
@@ -88,7 +88,7 @@ export const sendPasswordChangedEmail = async (
   name: string | null,
 ): Promise<void> => {
   const displayName = name ?? email;
-  const transporter = getEmailTransporter();
+  const transporter = await getEmailTransporter();
 
   await transporter.sendMail({
     from: FROM_ADDRESS,

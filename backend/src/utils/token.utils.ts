@@ -10,7 +10,7 @@ const REFRESH_TOKEN_EXPIRY = "7d";
 export const generateAccessToken = (payload: JwtPayload): string => {
   return jwt.sign(
     { userId: payload.userId, email: payload.email },
-    env.JWT_SECRET,
+    env.JWT_ACCESS_SECRET,
     { expiresIn: ACCESS_TOKEN_EXPIRY },
   );
 };
@@ -29,7 +29,7 @@ export const generateRefreshToken = (payload: RefreshTokenPayload): string => {
 
 export const verifyAccessToken = (token: string): JwtPayload => {
   try {
-    return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
+    return jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
   } catch {
     throw new ApiError(401, "Invalid or expired access token");
   }

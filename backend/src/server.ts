@@ -1,7 +1,11 @@
 import app from "./app";
-import { env, isDev } from "@/config/env";
+import { env} from "@/config/env";
 import { logger } from "@/utils/logger";
 import { prisma } from "@/config/database";
+import { getRedisClient } from "@/config/redis.config";
+import { initializeCleanupJobs } from "@/jobs/cleanup.job";
+import { closeRedisConnection } from "@/config/redis.config";
+import { closeEmailTransporter } from "@/config/email.config";
 
 const PORT = parseInt(env.PORT, 10);
 
@@ -15,6 +19,15 @@ const startServer = async () => {
     process.exit(1); // no point running if DB is down
   }
 
+  //redis connection
+  try {
+    const redis = getRedisClient();
+    await redis.connect();
+      await redis.ping();
+  } catch (error) {
+    logger.error("❌ Redis connection failed", { error });
+    process.exit(1); // no point running if Redis is down
+  } 
   const server = app.listen(PORT, () => {
     logger.info(`🚀 Server running on port ${PORT} in ${env.NODE_ENV} mode`);
   });
@@ -25,6 +38,13 @@ const startServer = async () => {
     server.close(async () => {
       await prisma.$disconnect();
       logger.info("Database connection closed.");
+
+      await closeRedisConnection();
+
+      await closeEmailTransporter();
+
+      logger.info("All connections closed. Exiting now.");
+      
       process.exit(0);
     });
   };
