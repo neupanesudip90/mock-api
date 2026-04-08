@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useEndpoints } from "@/hooks/useEndpoints";
 import { useApiKeys } from "@/hooks/useApiKeys";
@@ -24,9 +23,11 @@ import {
   CheckCircle,
   XCircle,
   Route,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Endpoint, HttpMethod } from "@/types";
+import type { Endpoint } from "@/types";
 
 interface PlaygroundTabProps {
   projectId: string;
@@ -35,7 +36,7 @@ interface PlaygroundTabProps {
 interface RequestResult {
   status: number;
   statusText: string;
-  data: string;
+  data: any;
   time: number;
   headers: Record<string, string>;
 }
@@ -45,17 +46,16 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
   const { apiKeys, isLoading: keysLoading } = useApiKeys(projectId);
 
   const [selectedEndpoint, setSelectedEndpoint] = useState<string>("");
-  const [selectedApiKey, setSelectedApiKey] = useState<string>("");
+  const [selectedApiKeyId, setSelectedApiKeyId] = useState<string>("");
+  const [fullApiKey, setFullApiKey] = useState<string>(""); // ← New: Full key input
+  const [showFullKey, setShowFullKey] = useState(false);
   const [pathParams, setPathParams] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<RequestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-    "http://localhost:3000";
-
   const currentEndpoint = endpoints?.find((e) => e.id === selectedEndpoint);
+  const selectedKeyInfo = apiKeys?.find((k) => k.id === selectedApiKeyId);
 
   // Extract path parameters from endpoint path
   const getPathParams = (path: string): string[] => {
@@ -65,18 +65,20 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
 
   const params = currentEndpoint ? getPathParams(currentEndpoint.path) : [];
 
-  // Build actual URL with params replaced
   const buildUrl = (): string => {
     if (!currentEndpoint) return "";
     let path = currentEndpoint.path;
     params.forEach((param) => {
       path = path.replace(`:${param}`, pathParams[param] || `:${param}`);
     });
-    return `${baseUrl}/api/mock/${projectId}${path}`;
+    return `${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:3000"}/api/mock/${projectId}${path}`;
   };
 
   const handleSendRequest = async () => {
-    if (!currentEndpoint || !selectedApiKey) return;
+    if (!currentEndpoint || !fullApiKey.trim()) {
+      setError("Please select an endpoint and enter your full API key");
+      return;
+    }
 
     setIsLoading(true);
     setResult(null);
@@ -86,21 +88,22 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
 
     try {
       const url = buildUrl();
+
       const response = await fetch(url, {
         method: currentEndpoint.method,
         headers: {
-          "x-api-key": selectedApiKey,
+          "x-api-key": fullApiKey.trim(), // ← Full key sent here
           "Content-Type": "application/json",
         },
       });
 
       const endTime = performance.now();
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       setResult({
         status: response.status,
         statusText: response.statusText,
-        data,
+        data: data || "No JSON body returned",
         time: Math.round(endTime - startTime),
         headers: Object.fromEntries(response.headers.entries()),
       });
@@ -161,7 +164,7 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
                   <SelectValue placeholder="Select an endpoint" />
                 </SelectTrigger>
                 <SelectContent>
-                  {endpoints?.map((endpoint) => (
+                  {endpoints.map((endpoint) => (
                     <SelectItem key={endpoint.id} value={endpoint.id}>
                       <div className="flex items-center gap-2">
                         <MethodBadge method={endpoint.method} />
@@ -175,26 +178,35 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
               </Select>
             </div>
 
-            {/* API Key Selection */}
+            {/* Full API Key Input - THIS IS THE IMPORTANT PART */}
             <div className="space-y-2">
-              <Label>API Key</Label>
-              <Select value={selectedApiKey} onValueChange={setSelectedApiKey}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an API key" />
-                </SelectTrigger>
-                <SelectContent>
-                  {apiKeys?.map((key) => (
-                    <SelectItem key={key.id} value={key.keyPrefix + "..."}>
-                      <span>{key.name}</span>
-                      <span className="ml-2 text-muted-foreground font-mono text-xs">
-                        ({key.keyPrefix}...)
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>
+                Full API Key <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  type={showFullKey ? "text" : "password"}
+                  placeholder="Paste your full API key here"
+                  value={fullApiKey}
+                  onChange={(e) => setFullApiKey(e.target.value)}
+                  className="font-mono pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7"
+                  onClick={() => setShowFullKey(!showFullKey)}
+                >
+                  {showFullKey ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
-                Note: For testing, use the full API key from creation.
+                Paste the full key shown when you created or rotated the key.
               </p>
             </div>
 
@@ -235,7 +247,7 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
             {/* Send Button */}
             <Button
               onClick={handleSendRequest}
-              disabled={!currentEndpoint || !selectedApiKey || isLoading}
+              disabled={!currentEndpoint || !fullApiKey.trim() || isLoading}
               className="w-full gap-2"
             >
               {isLoading ? (
@@ -253,7 +265,7 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
           </CardContent>
         </Card>
 
-        {/* Response */}
+        {/* Response Panel - unchanged */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Response</CardTitle>
@@ -269,7 +281,6 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
               </div>
             ) : result ? (
               <div className="space-y-4">
-                {/* Status */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {result.status < 400 ? (
@@ -294,7 +305,6 @@ export function PlaygroundTab({ projectId }: PlaygroundTabProps) {
                   </div>
                 </div>
 
-                {/* Response Body */}
                 <div>
                   <Label className="mb-2 block">Response Body</Label>
                   <JsonEditor

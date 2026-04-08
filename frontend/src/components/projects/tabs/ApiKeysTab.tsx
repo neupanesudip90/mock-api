@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useApiKeys } from "@/hooks/useApiKeys";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiKeyRow } from "@/components/api-keys/ApiKeyRow";
 import { CreateApiKeyDialog } from "@/components/api-keys/CreateApiKeyDialog";
+import { KeyRevealDialog } from "@/components/api-keys/KeyRevealDialog"; // ← Import this
 import { Plus, Key } from "lucide-react";
 
 interface ApiKeysTabProps {
@@ -16,7 +16,13 @@ interface ApiKeysTabProps {
 
 export function ApiKeysTab({ projectId }: ApiKeysTabProps) {
   const { apiKeys, isLoading } = useApiKeys(projectId);
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newlyRotatedKey, setNewlyRotatedKey] = useState<string | null>(null); // ← New state
+
+  const handleRotateSuccess = (plainKey: string) => {
+    setNewlyRotatedKey(plainKey);
+  };
 
   return (
     <div className="space-y-4">
@@ -78,6 +84,7 @@ export function ApiKeysTab({ projectId }: ApiKeysTabProps) {
                 apiKey={apiKey}
                 projectId={projectId}
                 isLast={index === apiKeys.length - 1}
+                onRotateSuccess={handleRotateSuccess} // ← Pass this
               />
             ))}
           </CardContent>
@@ -89,6 +96,16 @@ export function ApiKeysTab({ projectId }: ApiKeysTabProps) {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         projectId={projectId}
+      />
+
+      {/* New Key Reveal Dialog - Now at parent level */}
+      <KeyRevealDialog
+        open={!!newlyRotatedKey}
+        onOpenChange={(open) => {
+          if (!open) setNewlyRotatedKey(null);
+        }}
+        apiKey={newlyRotatedKey || ""}
+        title="New API Key Generated"
       />
     </div>
   );

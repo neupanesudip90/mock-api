@@ -19,6 +19,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { projects, isLoading } = useProjects();
@@ -35,7 +36,7 @@ export default function DashboardPage() {
         title={`Welcome back, ${user?.name || "Developer"}!`}
         description="Here's what's happening with your mock APIs today."
       >
-        <Link href="/projects/new">
+        <Link href="/projects">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
             New Project
@@ -104,7 +105,7 @@ export default function DashboardPage() {
               <p className="text-muted-foreground mb-4">
                 Create your first mock API project to get started.
               </p>
-              <Link href="/projects/new">
+              <Link href="/projects">
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
                   Create Project

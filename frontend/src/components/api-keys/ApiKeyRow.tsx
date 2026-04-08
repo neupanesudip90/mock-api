@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useApiKeys } from "@/hooks/useApiKeys";
 import { Button } from "@/components/ui/button";
@@ -16,24 +15,28 @@ import {
 import { MoreVertical, Trash2, RefreshCw, Key } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import type { ApiKey } from "@/types";
-import { KeyRevealDialog } from "./KeyRevealDialog";
 
 interface ApiKeyRowProps {
   apiKey: ApiKey;
   projectId: string;
   isLast?: boolean;
+  onRotateSuccess?: (plainKey: string) => void; // ← Add this
 }
 
-export function ApiKeyRow({ apiKey, projectId, isLast }: ApiKeyRowProps) {
+export function ApiKeyRow({
+  apiKey,
+  projectId,
+  isLast,
+  onRotateSuccess,
+}: ApiKeyRowProps) {
   const { revokeApiKey, rotateApiKey } = useApiKeys(projectId);
   const [showRevokeDialog, setShowRevokeDialog] = useState(false);
   const [showRotateDialog, setShowRotateDialog] = useState(false);
-  const [rotatedKey, setRotatedKey] = useState<string | null>(null);
 
   const handleRotate = () => {
     rotateApiKey.mutate(apiKey.id, {
       onSuccess: (data) => {
-        setRotatedKey(data.plainKey);
+        onRotateSuccess?.(data.plainKey); // ← Call parent handler
         setShowRotateDialog(false);
       },
     });
@@ -121,15 +124,7 @@ export function ApiKeyRow({ apiKey, projectId, isLast }: ApiKeyRowProps) {
         variant="default"
       />
 
-      {/* Reveal New Key */}
-      {rotatedKey && (
-        <KeyRevealDialog
-          open={!!rotatedKey}
-          onOpenChange={() => setRotatedKey(null)}
-          apiKey={rotatedKey}
-          title="New API Key Generated"
-        />
-      )}
+      {/* Removed KeyRevealDialog from here */}
     </>
   );
 }

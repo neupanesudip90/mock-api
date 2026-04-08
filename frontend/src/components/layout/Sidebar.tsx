@@ -61,18 +61,6 @@ export function Sidebar() {
         </Button>
       </div>
 
-      {/* Create Button */}
-      <div className="p-4">
-        <Link href="/projects/new">
-          <Button
-            className={cn("w-full gap-2", collapsed && "justify-center px-2")}
-          >
-            <Plus className="h-4 w-4" />
-            {!collapsed && <span>New Project</span>}
-          </Button>
-        </Link>
-      </div>
-
       {/* Main Nav */}
       <nav className="flex-1 space-y-1 px-3">
         {mainNavItems.map((item) => {

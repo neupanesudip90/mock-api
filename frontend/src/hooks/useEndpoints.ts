@@ -40,6 +40,7 @@ export function useEndpoints(projectId: string) {
   // Create Endpoint
   const createEndpoint = useMutation({
     mutationFn: async (payload: CreateEndpointPayload) => {
+        console.log("Payload being sent:", JSON.stringify(payload, null, 2));
       const response = await api.post<{ success: boolean; data: Endpoint }>(
         `/projects/${projectId}/endpoints`,
         {

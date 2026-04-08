@@ -27,17 +27,15 @@ const formatEndpoint = (endpoint: any): EndpointResponse => ({
   updatedAt: endpoint.updatedAt,
 });
 
-// ============================================================================
-// Validate Path Pattern
-// ============================================================================
 const validatePathPattern = (path: string): void => {
+    console.log("Validating path:", JSON.stringify(path));
   if (!path.startsWith("/")) {
     throw new ApiError(400, "Path must start with /");
   }
 
-  // Basic validation - you can enhance this
-  const invalidChars = /[^a-zA-Z0-9/_:-]/;
-  if (invalidChars.test(path.replace(/:\w+/g, ""))) {
+  // Allow: letters, numbers, /, -, _, ., and :param segments
+  const validPath = /^[a-zA-Z0-9/\-_.:]+$/;
+  if (!validPath.test(path)) {
     throw new ApiError(400, "Path contains invalid characters");
   }
 };

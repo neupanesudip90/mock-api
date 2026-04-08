@@ -68,6 +68,7 @@ export function CreateEndpointDialog({
   });
 
   const onSubmit = async (data: CreateEndpointFormData) => {
+      console.log("Form data:", JSON.stringify(data, null, 2));
     createEndpoint.mutate(
       {
         path: data.path,
