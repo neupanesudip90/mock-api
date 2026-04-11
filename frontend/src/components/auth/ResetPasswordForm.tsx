@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,20 +13,24 @@ import { Label } from "@/components/ui/label";
 import { Lock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
+import { useToast } from "@/hooks/use-toast"; // ← Add this for better UX
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ email }: { email?: string }) {
   const { resetPassword } = useAuth();
+  const { toast } = useToast();
+ const emailFromUrl = email;;
+
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      otp: "",
       newPassword: "",
       confirmPassword: "",
     },
@@ -39,7 +42,6 @@ export function ResetPasswordForm() {
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
-
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
@@ -56,14 +58,35 @@ export function ResetPasswordForm() {
   };
 
   const onSubmit = (data: ResetPasswordFormData) => {
+    const otpCode = otp.join("").trim();
+
+    if (otpCode.length !== 6) {
+      toast({
+        variant: "destructive",
+        title: "Incomplete Code",
+        description: "Please enter the full 6-digit verification code.",
+      });
+      return;
+    }
+
+    if (!emailFromUrl) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Email is missing. Please try again.",
+      });
+      return;
+    }
+
     resetPassword.mutate({
-      otp: otp.join(""),
+      email: emailFromUrl,
+      otp: otpCode,
       newPassword: data.newPassword,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Back Link */}
       <Link
         href="/login"
@@ -73,7 +96,14 @@ export function ResetPasswordForm() {
         Back to login
       </Link>
 
-      {/* OTP Inputs */}
+      {/* Email Info */}
+      {emailFromUrl && (
+        <p className="text-center text-sm text-muted-foreground">
+          Resetting password for <strong>{emailFromUrl}</strong>
+        </p>
+      )}
+
+      {/* OTP Section */}
       <div className="space-y-2">
         <Label>Verification Code</Label>
         <div className="flex justify-center gap-3">
@@ -105,8 +135,6 @@ export function ResetPasswordForm() {
           id="newPassword"
           type="password"
           placeholder="••••••••"
-          icon={<Lock className="h-4 w-4" />}
-          error={errors.newPassword?.message}
           {...register("newPassword")}
         />
         {errors.newPassword && (
@@ -118,13 +146,11 @@ export function ResetPasswordForm() {
 
       {/* Confirm Password */}
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Label htmlFor="confirmPassword">Confirm New Password</Label>
         <Input
           id="confirmPassword"
           type="password"
           placeholder="••••••••"
-          icon={<Lock className="h-4 w-4" />}
-          error={errors.confirmPassword?.message}
           {...register("confirmPassword")}
         />
         {errors.confirmPassword && (
@@ -134,13 +160,13 @@ export function ResetPasswordForm() {
         )}
       </div>
 
-      {/* Submit */}
+      {/* Submit Button */}
       <Button
         type="submit"
         className="w-full"
         size="lg"
         isLoading={resetPassword.isPending}
-        disabled={otp.some((digit) => !digit)}
+        disabled={otp.join("").length !== 6 || resetPassword.isPending}
       >
         Reset Password
       </Button>

@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+// hooks/useAuth.ts
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api, getErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
@@ -16,9 +17,16 @@ export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { user, setUser, setToken, logout: storeLogout } = useAuthStore();
 
-  // Register
+  const {
+    user,
+    setUser,
+    setToken,
+    logout: storeLogout,
+    setIsVerified,
+  } = useAuthStore();
+
+  // ====================== REGISTER ======================
   const register = useMutation({
     mutationFn: async (credentials: RegisterCredentials) => {
       const response = await api.post<{ success: boolean; data: AuthResponse }>(
@@ -27,17 +35,18 @@ export function useAuth() {
       );
       return response.data.data;
     },
+
     onSuccess: (data) => {
-      setUser(data.user);
-      setToken(data.tokens.accessToken);
       toast({
         variant: "success",
-        title: "Account created!",
-        description: "Please verify your email address.",
+        title: "Account created successfully!",
+        description: "We've sent a verification code to your email.",
       });
-      router.push("/verify-email");
+
+      router.push(`/verify-email?email=${encodeURIComponent(data.user.email)}`);
     },
-    onError: (error) => {
+
+    onError: (error: any) => {
       toast({
         variant: "destructive",
         title: "Registration failed",
@@ -46,49 +55,26 @@ export function useAuth() {
     },
   });
 
-  // Login
-  const login = useMutation({
-    mutationFn: async (credentials: LoginCredentials) => {
-      const response = await api.post<{ success: boolean; data: AuthResponse }>(
-        "/auth/login",
-        credentials,
-      );
-      return response.data.data;
-    },
-    onSuccess: (data) => {
-      setUser(data.user);
-      setToken(data.tokens.accessToken);
-      toast({
-        variant: "success",
-        title: "Welcome back!",
-        description: "You've successfully logged in.",
-      });
-      router.push("/dashboard");
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: getErrorMessage(error),
-      });
-    },
-  });
-
-  // Verify Email
+  // ====================== VERIFY EMAIL ======================
   const verifyEmail = useMutation({
     mutationFn: async (payload: VerifyEmailPayload) => {
       const response = await api.post("/auth/verify-email", payload);
       return response.data;
     },
+
     onSuccess: () => {
       toast({
         variant: "success",
-        title: "Email verified!",
-        description: "Your email has been verified successfully.",
+        title: "Email verified successfully!",
+        description: "Welcome to MockAPI!",
       });
+
+      // Force redirect to dashboard
       router.push("/dashboard");
     },
-    onError: (error) => {
+
+    onError: (error: any) => {
+      console.error("Verification error:", error);
       toast({
         variant: "destructive",
         title: "Verification failed",
@@ -97,12 +83,44 @@ export function useAuth() {
     },
   });
 
-  // Resend Verification Email
+  // ====================== LOGIN ======================
+  const login = useMutation({
+    mutationFn: async (credentials: LoginCredentials) => {
+      const response = await api.post<{ success: boolean; data: AuthResponse }>(
+        "/auth/login",
+        credentials,
+      );
+      return response.data.data;
+    },
+
+    onSuccess: (data) => {
+      setUser(data.user);
+      setToken(data.tokens.accessToken);
+      setIsVerified?.(true);
+
+      toast({
+        variant: "success",
+        title: "Welcome back!",
+        description: "You've successfully logged in.",
+      });
+      router.push("/dashboard");
+    },
+
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: getErrorMessage(error),
+      });
+    },
+  });
+
+  // ====================== RESEND VERIFICATION ======================
   const resendVerificationEmail = useMutation({
     mutationFn: async (email: string) => {
-      const response = await api.post("/auth/resend-verification", { email });
-      return response.data;
+      await api.post("/auth/resend-verification", { email });
     },
+
     onSuccess: () => {
       toast({
         variant: "success",
@@ -110,21 +128,22 @@ export function useAuth() {
         description: "A new verification code has been sent to your email.",
       });
     },
-    onError: (error) => {
+
+    onError: (error: any) => {
       toast({
         variant: "destructive",
-        title: "Failed to send code",
+        title: "Failed to resend code",
         description: getErrorMessage(error),
       });
     },
   });
 
-  // Forgot Password
+  // ====================== FORGOT PASSWORD ======================
   const forgotPassword = useMutation({
     mutationFn: async (payload: ForgotPasswordPayload) => {
-      const response = await api.post("/auth/forgot-password", payload);
-      return response.data;
+      await api.post("/auth/forgot-password", payload);
     },
+
     onSuccess: () => {
       toast({
         variant: "success",
@@ -133,7 +152,8 @@ export function useAuth() {
       });
       router.push("/reset-password");
     },
-    onError: (error) => {
+
+    onError: (error: any) => {
       toast({
         variant: "destructive",
         title: "Failed to send reset code",
@@ -142,34 +162,36 @@ export function useAuth() {
     },
   });
 
-  // Reset Password
+  // ====================== RESET PASSWORD ======================
   const resetPassword = useMutation({
     mutationFn: async (payload: ResetPasswordPayload) => {
-      const response = await api.post("/auth/reset-password", payload);
-      return response.data;
+      await api.post("/auth/reset-password", payload);
     },
+
     onSuccess: () => {
       toast({
         variant: "success",
-        title: "Password reset!",
-        description: "Your password has been reset successfully.",
+        title: "Password reset successful!",
+        description: "You can now login with your new password.",
       });
       router.push("/login");
     },
-    onError: (error) => {
+
+    onError: (error: any) => {
       toast({
         variant: "destructive",
-        title: "Reset failed",
+        title: "Password reset failed",
         description: getErrorMessage(error),
       });
     },
   });
 
-  // Logout
+  // ====================== LOGOUT ======================
   const logout = useMutation({
     mutationFn: async () => {
       await api.post("/auth/logout");
     },
+
     onSuccess: () => {
       storeLogout();
       queryClient.clear();
@@ -180,8 +202,8 @@ export function useAuth() {
         description: "You've been logged out successfully.",
       });
     },
+
     onError: () => {
-      // Still logout on frontend even if backend fails
       storeLogout();
       queryClient.clear();
       router.push("/login");

@@ -7,13 +7,19 @@ export const metadata: Metadata = {
   description: "Verify your email address",
 };
 
-export default function VerifyEmailPage() {
+export default async function VerifyEmailPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string }>;
+}) {
+  const params = await searchParams;
+
   return (
     <AuthLayout
-      title="Check your email"
-      description="We've sent you a 6-digit verification code"
+      title="Verify your email"
+      description="Enter the code sent to your email"
     >
-      <VerifyEmailForm />
+      <VerifyEmailForm email={params.email} />
     </AuthLayout>
   );
 }

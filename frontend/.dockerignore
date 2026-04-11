@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+
+# Next.js build (rebuilt during Docker build)
+.next
+out
+
+# Secrets
+.env
+.env.*
+.env.local
+
+# AI/editor context (not needed in image)
+AGENTS.md
+CLAUDE.md
+README.md
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# TypeScript declarations (auto-generated)
+next-env.d.ts

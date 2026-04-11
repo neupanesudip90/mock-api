@@ -7,13 +7,17 @@ export const metadata: Metadata = {
   description: "Set a new password",
 };
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage({
+  searchParams,
+}: {
+  searchParams: { email?: string };
+}) {
   return (
     <AuthLayout
       title="Reset your password"
       description="Enter the code we sent and your new password"
     >
-      <ResetPasswordForm />
+      <ResetPasswordForm email={searchParams.email} />
     </AuthLayout>
   );
 }

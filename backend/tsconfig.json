@@ -5,10 +5,11 @@
     "moduleResolution": "bundler",
     "rootDir": "src",
     "outDir": "dist",
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
+
+    // ✅ REMOVE "baseUrl" and "ignoreDeprecations"
+
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "sourceMap": true,

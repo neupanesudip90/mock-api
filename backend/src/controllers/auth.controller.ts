@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as authService from "@/services/auth.service";
+import { ApiError } from "@/utils/ApiError";
 
 // Cookie config — httpOnly prevents JS access (XSS protection)
 const REFRESH_COOKIE_OPTIONS = {
@@ -24,18 +25,17 @@ export const register = async (
   }
 };
 
-export const verifyEmail = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    // ← change from req.query.token to req.body.otp
-    await authService.verifyEmail(req.body.otp);
-    res.json({ success: true, message: "Email verified successfully" });
-  } catch (err) {
-    next(err);
+export const verifyEmailController = async (req: Request, res: Response) => {
+  const { email, code, type } = req.body;
+
+  if (!email || !code) {
+    throw new ApiError(400, "Email and code are required");
   }
+
+  await authService.verifyEmail({ email, code, type });
+  res
+    .status(200)
+    .json({ success: true, message: "Email verified successfully" });
 };
 
 export const resendVerification = async (

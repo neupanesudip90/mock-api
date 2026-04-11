@@ -1,10 +1,10 @@
+// src/services/mock.service.ts
 import { prisma } from "@/config/database";
 import { ApiError } from "@/utils/ApiError";
 import { generateMockData } from "@/utils/mockGenerator";
 import { match } from "path-to-regexp";
 import { HttpMethod } from "@/generated/client";
 import { logger } from "@/utils/logger";
-
 
 export interface MockRequestParams {
   projectId: string;
@@ -21,8 +21,6 @@ export interface UsageLogData {
   responseTimeMs: number;
   rateLimitHit: boolean;
 }
-
-
 
 // ============================================================================
 // Find Matching Endpoint
@@ -53,6 +51,7 @@ export const findMatchingEndpoint = async ({
       method: method as HttpMethod,
     },
   });
+
   // Find the first endpoint that matches the path pattern
   for (const endpoint of endpoints) {
     try {
@@ -80,14 +79,45 @@ export const findMatchingEndpoint = async ({
 export const generateMockResponse = async (
   endpoint: any,
   params: Record<string, string>,
+  requestContext: {
+    query?: Record<string, any>;
+    body?: Record<string, any>;
+    headers?: Record<string, any>;
+  } = {},
 ) => {
   // Apply delay if configured
   if (endpoint.delayMs > 0) {
     await new Promise((resolve) => setTimeout(resolve, endpoint.delayMs));
   }
 
-  // Generate data from schema
-  const data = generateMockData(endpoint.responseSchema, params);
+  // Build context for template processing
+  const context: Record<string, any> = {
+    ...params, // Route params (e.g., { id: "123" })
+  };
+
+  // Add query parameters with "query_" prefix
+  if (requestContext.query) {
+    for (const [key, value] of Object.entries(requestContext.query)) {
+      context[`query_${key}`] = value;
+    }
+  }
+
+  // Add body fields with "body_" prefix
+  if (requestContext.body) {
+    for (const [key, value] of Object.entries(requestContext.body)) {
+      context[`body_${key}`] = value;
+    }
+  }
+
+  // Add headers with "header_" prefix
+  if (requestContext.headers) {
+    for (const [key, value] of Object.entries(requestContext.headers)) {
+      context[`header_${key}`] = value;
+    }
+  }
+
+  // Generate data from schema (auto-detects static vs dynamic)
+  const data = generateMockData(endpoint.responseSchema, context);
 
   return {
     statusCode: endpoint.statusCode,

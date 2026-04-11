@@ -30,7 +30,7 @@ export interface RegisterCredentials {
 }
 
 export interface VerifyEmailPayload {
-  otp: string;
+  code: string;
 }
 
 export interface ForgotPasswordPayload {
@@ -38,6 +38,7 @@ export interface ForgotPasswordPayload {
 }
 
 export interface ResetPasswordPayload {
+  email: string;
   otp: string;
   newPassword: string;
 }

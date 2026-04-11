@@ -1,0 +1,24 @@
+# Never copy these into Docker build context
+node_modules
+dist
+
+# Secrets
+.env
+.env.*
+
+# Prisma generated (regenerated during build)
+src/generated/
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Dev/editor
+.vscode/
+README.md
+coverage/
+

@@ -68,28 +68,43 @@ export const createProjectSchema = z.object({
 // ============================================================================
 // Endpoint Validations
 // ============================================================================
+
+
+// Helper function to validate JSON string
+const isValidJson = (str: string): boolean => {
+  if (!str || str.trim() === "") return false;
+  try {
+    const trimmed = str.trim();
+    JSON.parse(trimmed);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const createEndpointSchema = z.object({
   path: z
     .string()
     .min(1, "Path is required")
     .regex(/^\//, "Path must start with /"),
-  method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]),
-  statusCode: z.coerce.number().int().min(100).max(599).optional().default(200),
-  delayMs: z.coerce.number().int().min(0).max(10000).optional().default(0),
-  responseSchema: z.string().refine(
-    (val) => {
-      try {
-        JSON.parse(val);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    { message: "Invalid JSON" },
-  ),
-  rateLimitEnabled: z.boolean().optional().default(true),
-  rateLimitMax: z.coerce.number().int().min(1).max(100000).optional(),
-  rateLimitWindow: z.coerce.number().int().min(1).max(86400).optional(),
+  method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
+  statusCode: z.coerce
+    .number({ invalid_type_error: "Must be a number" })
+    .int("Must be an integer")
+    .min(100, "Must be at least 100")
+    .max(599, "Must be at most 599"),
+  delayMs: z.coerce
+    .number({ invalid_type_error: "Must be a number" })
+    .int("Must be an integer")
+    .min(0, "Must be at least 0")
+    .default(0),
+  responseSchema: z
+    .string()
+    .min(1, "Response schema is required")
+    .refine(isValidJson, {
+      message: "Invalid JSON format. Please check your syntax.",
+    }),
+  rateLimitEnabled: z.boolean().default(true),
 });
 
 // ============================================================================
@@ -113,3 +128,8 @@ export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>;
 export type CreateProjectFormData = z.infer<typeof createProjectSchema>;
 export type CreateEndpointFormData = z.infer<typeof createEndpointSchema>;
 export type CreateApiKeyFormData = z.infer<typeof createApiKeySchema>;
+
+// Separate schema for updates (all fields optional except what you're changing)
+export const updateEndpointSchema = createEndpointSchema.partial();
+
+export type UpdateEndpointFormData = z.infer<typeof updateEndpointSchema>;

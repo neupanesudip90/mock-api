@@ -13,7 +13,10 @@ const getUserId = (req: Request): string => {
 export const createEndpoint = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
-   const { projectId } = req.params as { projectId: string; endpointId: string };
+    const { projectId } = req.params as {
+      projectId: string;
+      endpointId: string;
+    };
 
     const endpoint = await endpointService.createEndpoint(
       userId,

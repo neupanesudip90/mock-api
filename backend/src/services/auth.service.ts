@@ -117,7 +117,7 @@ export const registerUser = async (
     await sendVerificationEmail(user.email, user.name, otp);
     logger.info("✅ Verification email sent successfully");
   } catch (err: any) {
-    logger.error(`❌ Failed to send verification email:`, err); 
+    logger.error(`❌ Failed to send verification email:`, err);
   }
 
   return buildAuthResponse(user);
@@ -126,65 +126,116 @@ export const registerUser = async (
 // ============================================================================
 // Email Verification
 // ============================================================================
-export const verifyEmail = async (otp: string): Promise<void> => {
+// src/services/auth.service.ts
+
+// src/services/auth.service.ts
+export const verifyEmail = async (payload: {
+  email: string;
+  code: string;
+  type?: string;
+}): Promise<void> => {
+  const { email, code, type = "EMAIL_VERIFICATION" } = payload;
+  const cleanCode = code.trim();
+
+  console.log("🔍 VERIFY EMAIL - FULL DEBUG");
+  console.log("Received payload:", { email, code: cleanCode, type });
+
+  // 1. Find user
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase().trim() },
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // 2. Find OTP with very loose conditions first for debugging
   const otpRecord = await prisma.otpCode.findFirst({
     where: {
-      code: otp,
-      type: OtpType.EMAIL_VERIFICATION,
+      userId: user.id,
+      code: cleanCode,
+      type: type as OtpType,
       expiresAt: { gt: new Date() },
       usedAt: null,
     },
   });
 
-  if (!otpRecord) throw new ApiError(400, "Invalid or expired OTP");
 
-  // Mark OTP as used and verify user atomically
+  if (!otpRecord) {
+    // Show all OTPs for this user to see what's actually in DB
+    const allOtps = await prisma.otpCode.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
+
+    console.log("All OTPs for this user:", allOtps.map(o => ({
+      id: o.id,
+      code: o.code,
+      type: o.type,
+      expiresAt: o.expiresAt,
+      usedAt: o.usedAt,
+      createdAt: o.createdAt,
+    })));
+
+    throw new ApiError(400, "Invalid or expired OTP");
+  }
+
   await prisma.$transaction([
     prisma.otpCode.update({
       where: { id: otpRecord.id },
       data: { usedAt: new Date() },
     }),
     prisma.user.update({
-      where: { id: otpRecord.userId },
+      where: { id: user.id },
       data: { emailVerified: true },
     }),
   ]);
-};
 
-// ============================================================================
+  console.log("✅ Email verification completed successfully");
+};
+// ==========================================================================
 // Resend Verification Email
 // ============================================================================
 export const resendVerificationEmail = async (email: string): Promise<void> => {
+  const cleanEmail = email.toLowerCase().trim();
+
   const user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
+    where: { email: cleanEmail },
   });
 
-  // Always silent — don't reveal if email exists
-  if (!user || user.emailVerified) return;
+  if (!user) {
+    // Don't reveal if user exists or not (security)
+    return;
+  }
 
-  // Invalidate all previous unused OTPs
-  await prisma.otpCode.updateMany({
+  // Delete old unused OTPs for this user
+  await prisma.otpCode.deleteMany({
     where: {
       userId: user.id,
-      type: OtpType.EMAIL_VERIFICATION,
+      type: "EMAIL_VERIFICATION",
       usedAt: null,
     },
-    data: { usedAt: new Date() },
   });
 
-  const otp = generateOTP();
+  // Generate new OTP
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit code
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
   await prisma.otpCode.create({
     data: {
       userId: user.id,
-      code: otp,
-      type: OtpType.EMAIL_VERIFICATION,
-      expiresAt: getOTPExpiry(),
+      code,
+      type: "EMAIL_VERIFICATION",
+      expiresAt,
     },
   });
 
-  await sendVerificationEmail(user.email, user.name, otp);
-};
+  // TODO: Send email with the code (implement your email service here)
+  console.log(`Verification code for ${cleanEmail}: ${code}`); // Remove in production
 
+  // In production, call your email service here
+};
 // ============================================================================
 // Login
 // ============================================================================

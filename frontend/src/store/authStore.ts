@@ -8,6 +8,7 @@ interface AuthState {
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   logout: () => void;
+  setIsVerified?: (isVerified: boolean) => void; // Optional for future use
 }
 
 // Custom storage that uses cookies for SSR compatibility

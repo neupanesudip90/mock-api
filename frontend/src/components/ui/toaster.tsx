@@ -24,7 +24,7 @@ export function Toaster() {
         variant = "default",
         ...props
       }) {
-        const Icon = TOAST_ICONS[variant];
+        const Icon = TOAST_ICONS[variant || "default"]; ;
 
         return (
           <Toast key={id} variant={variant} {...props}>

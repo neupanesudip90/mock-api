@@ -1,86 +1,115 @@
+// components/projects/tabs/EndpointsTab.tsx
 "use client";
 
 import { useState } from "react";
 import { useEndpoints } from "@/hooks/useEndpoints";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EndpointRow } from "@/components/endpoints/EndpointRow";
+import { Plus, RefreshCw, Inbox } from "lucide-react";
 import { CreateEndpointDialog } from "@/components/endpoints/CreateEndpointDialog";
-import { Plus, Route } from "lucide-react";
+import { EditEndpointDialog } from "@/components/endpoints/EditEndpointDialog";
+import { EndpointRow } from "@/components/endpoints/EndpointRow";
+import type { Endpoint } from "@/types";
 
 interface EndpointsTabProps {
   projectId: string;
 }
 
 export function EndpointsTab({ projectId }: EndpointsTabProps) {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint | null>(
+    null,
+  );
+
+  // ✅ Destructure correctly - endpoints is now Endpoint[] | undefined, not a query object
   const { endpoints, isLoading } = useEndpoints(projectId);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // ✅ Convert to array with fallback
+  const endpointsList = endpoints ?? [];
+
+  const handleEdit = (endpoint: Endpoint) => {
+    setSelectedEndpoint(endpoint);
+    setEditDialogOpen(true);
+  };
+
+  // ✅ Use isLoading directly
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Endpoints</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">Endpoints</h2>
-          <p className="text-sm text-muted-foreground">
-            Configure your mock API endpoints
-          </p>
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Endpoint
-        </Button>
-      </div>
-
-      {/* Endpoints List */}
-      {isLoading ? (
-        <Card>
-          <CardContent className="p-0">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between p-4 border-b last:border-0"
-              >
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-6 w-16" />
-                  <Skeleton className="h-5 w-40" />
-                </div>
-                <Skeleton className="h-8 w-8" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : endpoints?.length === 0 ? (
-        <EmptyState
-          icon={Route}
-          title="No endpoints yet"
-          description="Create your first endpoint to start mocking API responses."
-          actionLabel="Create Endpoint"
-          onAction={() => setIsCreateDialogOpen(true)}
-        />
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            {endpoints?.map((endpoint, index) => (
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Endpoints ({endpointsList.length})</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Endpoint
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {endpointsList.length === 0 ? (
+            // Empty state
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Inbox className="w-12 h-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No endpoints yet</h3>
+              <p className="text-sm text-muted-foreground mt-1 mb-4">
+                Create your first endpoint to get started
+              </p>
+              <Button onClick={() => setCreateDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Endpoint
+              </Button>
+            </div>
+          ) : (
+            // Map over the endpoints array
+            endpointsList.map((endpoint, index) => (
               <EndpointRow
                 key={endpoint.id}
                 endpoint={endpoint}
                 projectId={projectId}
-                isLast={index === endpoints.length - 1}
+                onEdit={() => handleEdit(endpoint)}
+                isLast={index === endpointsList.length - 1}
               />
-            ))}
-          </CardContent>
-        </Card>
-      )}
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {/* Create Dialog */}
       <CreateEndpointDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
         projectId={projectId}
       />
-    </div>
+
+      {/* Edit Dialog */}
+      {selectedEndpoint && (
+        <EditEndpointDialog
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) setSelectedEndpoint(null);
+          }}
+          projectId={projectId}
+          endpoint={selectedEndpoint}
+        />
+      )}
+    </>
   );
 }
