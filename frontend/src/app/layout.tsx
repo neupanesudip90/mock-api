@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   description:
     "Build, configure, and test mock API endpoints without writing backend code. Perfect for frontend development and prototyping.",
   keywords: ["mock api", "api testing", "frontend development", "prototyping"],
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
