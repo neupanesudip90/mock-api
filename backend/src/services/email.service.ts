@@ -1,9 +1,9 @@
-import * as Brevo from "@getbrevo/brevo";
+const Brevo = require("@getbrevo/brevo");
 import { env } from "@/config/env";
 import { logger } from "@/utils/logger";
 
-// ✅ FIX: access via `.default`
-const brevo = Brevo.default;
+// ✅ Handle both export types
+const brevo = Brevo.default || Brevo;
 
 // ✅ API instance
 const apiInstance = new brevo.TransactionalEmailsApi();
