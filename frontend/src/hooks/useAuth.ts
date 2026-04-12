@@ -66,22 +66,12 @@ export function useAuth() {
     },
 
     onSuccess: (data) => {
-      console.log("verify response:", data);
-      if (data?.user && data?.tokens) {
-        setUser(data.user);
-        setToken(data.tokens.accessToken);
-        setIsVerified?.(true);
-        router.push("/dashboard");
-      } else {
-        // backend doesn't return tokens on verify, send to login
-        router.push("/login");
-      }
+      setUser(data.user);
+      setToken(data.tokens.accessToken);
+      setIsVerified?.(true);
 
-      toast({
-        variant: "success",
-        title: "Email verified successfully!",
-        description: "Welcome to MockAPI!",
-      });
+      // set cookie for middleware
+      document.cookie = `auth-storage=${JSON.stringify({ state: { isAuthenticated: true } })}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
       router.push("/dashboard");
     },
@@ -209,6 +199,8 @@ export function useAuth() {
       storeLogout();
       queryClient.clear();
       router.push("/login");
+      // clear cookie
+      document.cookie = "auth-storage=; path=/; max-age=0";
       toast({
         variant: "info",
         title: "Logged out",
