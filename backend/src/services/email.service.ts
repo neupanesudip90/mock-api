@@ -1,5 +1,4 @@
-const Brevo = require("@getbrevo/brevo");
-
+import * as Brevo from "@getbrevo/brevo";
 import { env } from "@/config/env";
 import { logger } from "@/utils/logger";
 
