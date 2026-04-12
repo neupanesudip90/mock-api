@@ -26,7 +26,7 @@ export function useAuth() {
     setIsVerified,
   } = useAuthStore();
 
-  //  REGISTER 
+  //  REGISTER
   const register = useMutation({
     mutationFn: async (credentials: RegisterCredentials) => {
       const response = await api.post<{ success: boolean; data: AuthResponse }>(
@@ -55,21 +55,27 @@ export function useAuth() {
     },
   });
 
-  //  VERIFY EMAIL 
+  //  VERIFY EMAIL
   const verifyEmail = useMutation({
     mutationFn: async (payload: VerifyEmailPayload) => {
-      const response = await api.post("/auth/verify-email", payload);
-      return response.data;
+      const response = await api.post<{ success: boolean; data: AuthResponse }>(
+        "/auth/verify-email",
+        payload,
+      );
+      return response.data.data; // <-- extract .data.data like login does
     },
 
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setUser(data.user);
+      setToken(data.tokens.accessToken);
+      setIsVerified?.(true);
+
       toast({
         variant: "success",
         title: "Email verified successfully!",
         description: "Welcome to MockAPI!",
       });
 
-      // Force redirect to dashboard
       router.push("/dashboard");
     },
 
@@ -83,7 +89,7 @@ export function useAuth() {
     },
   });
 
-  //  LOGIN 
+  //  LOGIN
   const login = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
       const response = await api.post<{ success: boolean; data: AuthResponse }>(
@@ -115,7 +121,7 @@ export function useAuth() {
     },
   });
 
-  //  RESEND VERIFICATION 
+  //  RESEND VERIFICATION
   const resendVerificationEmail = useMutation({
     mutationFn: async (email: string) => {
       await api.post("/auth/resend-verification", { email });
@@ -138,7 +144,7 @@ export function useAuth() {
     },
   });
 
-  //  FORGOT PASSWORD 
+  //  FORGOT PASSWORD
   const forgotPassword = useMutation({
     mutationFn: async (payload: ForgotPasswordPayload) => {
       await api.post("/auth/forgot-password", payload);
@@ -162,7 +168,7 @@ export function useAuth() {
     },
   });
 
-  //  RESET PASSWORD 
+  //  RESET PASSWORD
   const resetPassword = useMutation({
     mutationFn: async (payload: ResetPasswordPayload) => {
       await api.post("/auth/reset-password", payload);
@@ -186,7 +192,7 @@ export function useAuth() {
     },
   });
 
-  //  LOGOUT 
+  //  LOGOUT
   const logout = useMutation({
     mutationFn: async () => {
       await api.post("/auth/logout");

@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc && cp -r src/generated dist/generated",
+    "build": "tsc && tsc-alias && cp -r src/generated dist/generated",
     "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
@@ -28,7 +28,6 @@
   "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
-    "@getbrevo/brevo": "^5.0.4",
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.7.0",
     "@prisma/engines": "^7.6.0",
@@ -42,7 +41,6 @@
     "install": "^0.13.0",
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
-    "module-alias": "^2.3.4",
     "morgan": "^1.10.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.4",
@@ -74,8 +72,5 @@
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
-  },
-  "_moduleAliases": {
-    "@": "./dist"
   }
 }

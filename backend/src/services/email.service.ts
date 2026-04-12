@@ -4,6 +4,7 @@ import { logger } from "@/utils/logger";
 // ============================================================================
 // Base Brevo API call
 // ============================================================================
+console.log("Using Brevo API Key:", env.BREVO_API_KEY)
 const sendEmail = async (data: any): Promise<void> => {
   try {
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
