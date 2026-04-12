@@ -1,4 +1,3 @@
-// src/controllers/mock.controller.ts
 import { Request, Response } from "express";
 import { catchAsync } from "@/utils/catchAsync";
 import { ApiError } from "@/utils/ApiError";
@@ -43,9 +42,9 @@ export const handleMockRequest = catchAsync(
 
     const { endpoint, params } = matchResult;
 
-    // =========================================================================
+    
     // Rate Limiting
-    // =========================================================================
+    
     let rateLimitHit = false;
 
     if (endpoint.rateLimitEnabled) {
@@ -92,9 +91,9 @@ export const handleMockRequest = catchAsync(
       }
     }
 
-    // =========================================================================
+    
     // Generate Response
-    // =========================================================================
+    
     const { statusCode, data } = await generateMockResponse(endpoint, params, {
       query: req.query as Record<string, any>,
       body: req.body as Record<string, any>,

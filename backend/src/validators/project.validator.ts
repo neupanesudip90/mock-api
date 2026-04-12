@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { ProjectStatus, RateLimitStrategy } from "@/generated/client";
 
-// ============================================================================
+
 // Create Project
-// ============================================================================
+
 export const createProjectSchema = z.object({
   body: z.object({
     name: z
@@ -32,9 +32,9 @@ export const createProjectSchema = z.object({
   }),
 });
 
-// ============================================================================
+
 // Update Project
-// ============================================================================
+
 export const updateProjectSchema = z.object({
   params: z.object({
     projectId: z.string().uuid("Invalid project ID"),
@@ -63,18 +63,18 @@ export const updateProjectSchema = z.object({
     }),
 });
 
-// ============================================================================
+
 // Get/Delete Project
-// ============================================================================
+
 export const projectIdSchema = z.object({
   params: z.object({
     projectId: z.string().uuid("Invalid project ID"),
   }),
 });
 
-// ============================================================================
+
 // List Projects Query
-// ============================================================================
+
 export const listProjectsSchema = z.object({
   query: z.object({
     status: z.nativeEnum(ProjectStatus).optional(),
@@ -99,9 +99,9 @@ export const listProjectsSchema = z.object({
   }),
 });
 
-// ============================================================================
+
 // Type Exports
-// ============================================================================
+
 export type CreateProjectBody = z.infer<typeof createProjectSchema>["body"];
 export type UpdateProjectBody = z.infer<typeof updateProjectSchema>["body"];
 export type ListProjectsQuery = z.infer<typeof listProjectsSchema>["query"];

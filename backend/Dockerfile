@@ -26,22 +26,18 @@ RUN npm run build
 
 # Stage 2: Production 
 FROM node:20-alpine AS production
-
 WORKDIR /app
-
 ENV NODE_ENV=production
 
-# Non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Copy ONLY what's needed to run
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY tsconfig.json ./
 COPY package*.json ./
 
 USER appuser
-
-EXPOSE 5000
-
+EXPOSE 3000
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]

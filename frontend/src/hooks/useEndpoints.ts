@@ -87,12 +87,7 @@ export function useEndpoints(projectId: string) {
         );
         return response.data.data;
       } catch (error: any) {
-        console.error("=== BACKEND ERROR ===");
-        console.error("Status:", error.response?.status);
-        console.error(
-          "Error Data:",
-          JSON.stringify(error.response?.data, null, 2),
-        );
+
         throw error;
       }
     },

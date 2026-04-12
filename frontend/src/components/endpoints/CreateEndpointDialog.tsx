@@ -38,9 +38,9 @@ interface CreateEndpointDialogProps {
   projectId: string;
 }
 
-// ============================================================================
+
 // Response Templates
-// ============================================================================
+
 const RESPONSE_TEMPLATES = {
   dynamic: {
     user: `{
@@ -104,9 +104,9 @@ const RESPONSE_TEMPLATES = {
   },
 };
 
-// ============================================================================
+
 // Helper Functions
-// ============================================================================
+
 const hasDynamicTemplates = (value: string): boolean => {
   return /\{\{[^}]+\}\}/.test(value);
 };
@@ -139,7 +139,7 @@ export function CreateEndpointDialog({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<CreateEndpointFormData>({
+  } = useForm({
     resolver: zodResolver(createEndpointSchema),
     defaultValues: {
       path: "/",

@@ -8,9 +8,8 @@ import type {
   EndpointListResponse,
 } from "@/types/endpoint.types";
 
-// ============================================================================
+
 // Helpers
-// ============================================================================
 const formatEndpoint = (endpoint: any): EndpointResponse => ({
   id: endpoint.id,
   projectId: endpoint.projectId,
@@ -40,9 +39,8 @@ const validatePathPattern = (path: string): void => {
   }
 };
 
-// ============================================================================
+
 // Create Endpoint
-// ============================================================================
 export const createEndpoint = async (
   userId: string,
   projectId: string,
@@ -103,9 +101,8 @@ export const createEndpoint = async (
   return formatEndpoint(endpoint);
 };
 
-// ============================================================================
+
 // List Endpoints
-// ============================================================================
 export const listEndpoints = async (
   userId: string,
   projectId: string,
@@ -123,9 +120,8 @@ export const listEndpoints = async (
   };
 };
 
-// ============================================================================
+
 // Get Endpoint
-// ============================================================================
 export const getEndpoint = async (
   userId: string,
   projectId: string,
@@ -144,9 +140,8 @@ export const getEndpoint = async (
   return formatEndpoint(endpoint);
 };
 
-// ============================================================================
+
 // Update Endpoint
-// ============================================================================
 export const updateEndpoint = async (
   userId: string,
   projectId: string,
@@ -215,9 +210,8 @@ export const updateEndpoint = async (
   return formatEndpoint(updated);
 };
 
-// ============================================================================
+
 // Delete Endpoint
-// ============================================================================
 export const deleteEndpoint = async (
   userId: string,
   projectId: string,

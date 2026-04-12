@@ -9,9 +9,8 @@ import type {
 import { Prisma } from "@/generated/client";
 import {ListProjectsQuery} from "../validators/project.validator"
 
-// ============================================================================
+
 // Helpers
-// ============================================================================
 const formatProject = (
   project: any,
   endpointCount: number = 0,
@@ -30,9 +29,9 @@ const formatProject = (
   updatedAt: project.updatedAt,
 });
 
-// ============================================================================
+
 // Create Project
-// ============================================================================
+
 export const createProject = async (
   userId: string,
   input: CreateProjectInput,
@@ -52,9 +51,9 @@ export const createProject = async (
   return formatProject(project, 0, 0);
 };
 
-// ============================================================================
+
 // List Projects (with pagination, filtering, sorting)
-// ============================================================================
+
 export const listProjects = async (
   userId: string,
   query: ListProjectsQuery,
@@ -112,9 +111,9 @@ export const listProjects = async (
   };
 };
 
-// ============================================================================
+
 // Get Single Project
-// ============================================================================
+
 export const getProject = async (
   userId: string,
   projectId: string,
@@ -142,9 +141,9 @@ export const getProject = async (
   );
 };
 
-// ============================================================================
+
 // Update Project
-// ============================================================================
+
 export const updateProject = async (
   userId: string,
   projectId: string,
@@ -210,9 +209,9 @@ export const updateProject = async (
   );
 };
 
-// ============================================================================
+
 // Delete Project
-// ============================================================================
+
 export const deleteProject = async (
   userId: string,
   projectId: string,
@@ -231,9 +230,9 @@ export const deleteProject = async (
   });
 };
 
-// ============================================================================
+
 // Verify Project Ownership (helper for other services)
-// ============================================================================
+
 export const verifyProjectOwnership = async (
   userId: string,
   projectId: string,

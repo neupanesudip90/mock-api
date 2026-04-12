@@ -83,7 +83,6 @@ export function EndpointsTab({ projectId }: EndpointsTabProps) {
                 key={endpoint.id}
                 endpoint={endpoint}
                 projectId={projectId}
-                onEdit={() => handleEdit(endpoint)}
                 isLast={index === endpointsList.length - 1}
               />
             ))

@@ -8,9 +8,8 @@ import { getRedisClient } from "@/config/redis.config";
 import { RateLimitStrategy } from "@/generated/client";
 import { logger } from "@/utils/logger";
 
-// ============================================================================
+
 // Types
-// ============================================================================
 export interface RateLimitConfig {
   projectId: string;
   endpointId: string;
@@ -27,14 +26,13 @@ export interface RateLimitResult {
   total: number;
 }
 
-// ============================================================================
+
 // In-Memory Store (Fallback)
-// ============================================================================
+
 const memoryLimiters = new Map<string, RateLimiterMemory>();
 
-// ============================================================================
+
 // Get or Create Rate Limiter
-// ============================================================================
 const getRateLimiter = (
   config: RateLimitConfig,
 ): RateLimiterMemory | RateLimiterRedis => {
@@ -63,9 +61,8 @@ const getRateLimiter = (
   return memoryLimiters.get(key)!;
 };
 
-// ============================================================================
+
 // Fixed Window Rate Limiting
-// ============================================================================
 const fixedWindowLimit = async (
   config: RateLimitConfig,
 ): Promise<RateLimitResult> => {
@@ -91,9 +88,8 @@ const fixedWindowLimit = async (
   }
 };
 
-// ============================================================================
+
 // Sliding Log Rate Limiting
-// ============================================================================
 const slidingLogLimit = async (
   config: RateLimitConfig,
 ): Promise<RateLimitResult> => {
@@ -147,9 +143,8 @@ const slidingLogLimit = async (
   return fixedWindowLimit(config);
 };
 
-// ============================================================================
+
 // Token Bucket Rate Limiting
-// ============================================================================
 const tokenBucketLimit = async (
   config: RateLimitConfig,
 ): Promise<RateLimitResult> => {
@@ -204,9 +199,8 @@ const tokenBucketLimit = async (
   return fixedWindowLimit(config);
 };
 
-// ============================================================================
+
 // Leaky Bucket Rate Limiting
-// ============================================================================
 const leakyBucketLimit = async (
   config: RateLimitConfig,
 ): Promise<RateLimitResult> => {
@@ -261,9 +255,8 @@ const leakyBucketLimit = async (
   return fixedWindowLimit(config);
 };
 
-// ============================================================================
+
 // Main Rate Limit Check
-// ============================================================================
 export const checkRateLimit = async (
   config: RateLimitConfig,
 ): Promise<RateLimitResult> => {
@@ -292,9 +285,8 @@ export const checkRateLimit = async (
   }
 };
 
-// ============================================================================
+
 // Clear Rate Limit (for testing or admin)
-// ============================================================================
 export const clearRateLimit = async (
   projectId: string,
   endpointId?: string,

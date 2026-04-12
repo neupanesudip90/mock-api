@@ -23,9 +23,7 @@ const parseDate = (value: unknown): Date | undefined => {
   return undefined;
 };
 
-// ============================================================================
-// Get Project Analytics
-// ============================================================================
+// Get Project Analytics 
 export const getAnalytics = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);
@@ -46,9 +44,8 @@ export const getAnalytics = catchAsync(
   },
 );
 
-// ============================================================================
-// Get Endpoint Analytics
-// ============================================================================
+
+// Get Endpoint Analytics 
 export const getEndpointStats = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const userId = getUserId(req);

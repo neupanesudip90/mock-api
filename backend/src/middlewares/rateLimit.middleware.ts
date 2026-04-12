@@ -4,9 +4,7 @@ import { ApiError } from "@/utils/ApiError";
 import { getClientIp } from "@/utils/request.utils";
 import { logger } from "@/utils/logger";
 
-// ============================================================================
 // Rate Limit Headers
-// ============================================================================
 const setRateLimitHeaders = (res: Response, result: RateLimitResult): void => {
   res.setHeader("X-RateLimit-Limit", result.total);
   res.setHeader("X-RateLimit-Remaining", result.remaining);
@@ -16,9 +14,7 @@ const setRateLimitHeaders = (res: Response, result: RateLimitResult): void => {
   );
 };
 
-// ============================================================================
 // Mock Endpoint Rate Limiter
-// ============================================================================
 export const mockRateLimiter = async (
   req: Request,
   res: Response,
@@ -56,9 +52,7 @@ export const mockRateLimiter = async (
   next();
 };
 
-// ============================================================================
 // Auth Rate Limiter (Prevent Brute Force)
-// ============================================================================
 export const authRateLimiter = async (
   req: Request,
   res: Response,
@@ -101,9 +95,7 @@ export const authRateLimiter = async (
   }
 };
 
-// ============================================================================
 // Global API Rate Limiter
-// ============================================================================
 export const globalRateLimiter = async (
   req: Request,
   res: Response,

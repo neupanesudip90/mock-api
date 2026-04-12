@@ -3,9 +3,9 @@ import { prisma } from "@/config/database";
 import { logger } from "@/utils/logger";
 import { env } from "@/config/env";
 
-// ============================================================================
+
 // Cleanup Expired OTPs
-// ============================================================================
+
 const cleanupExpiredOTPs = async (): Promise<void> => {
   try {
     const result = await prisma.otpCode.deleteMany({
@@ -22,9 +22,9 @@ const cleanupExpiredOTPs = async (): Promise<void> => {
   }
 };
 
-// ============================================================================
+
 // Cleanup Old Usage Logs (Keep last 30 days)
-// ============================================================================
+
 const cleanupOldUsageLogs = async (): Promise<void> => {
   try {
     const thirtyDaysAgo = new Date();
@@ -44,9 +44,9 @@ const cleanupOldUsageLogs = async (): Promise<void> => {
   }
 };
 
-// ============================================================================
+
 // Cleanup Inactive API Keys (not used in 90 days)
-// ============================================================================
+
 const warnUnusedAPIKeys = async (): Promise<void> => {
   try {
     const ninetyDaysAgo = new Date();
@@ -78,9 +78,9 @@ const warnUnusedAPIKeys = async (): Promise<void> => {
   }
 };
 
-// ============================================================================
+
 // Archive Old Projects (optional - mark as ARCHIVED if no activity)
-// ============================================================================
+
 const archiveInactiveProjects = async (): Promise<void> => {
   try {
     const sixMonthsAgo = new Date();
@@ -113,9 +113,9 @@ const archiveInactiveProjects = async (): Promise<void> => {
   }
 };
 
-// ============================================================================
+
 // Database Statistics (for monitoring)
-// ============================================================================
+
 const logDatabaseStats = async (): Promise<void> => {
   try {
     const [users, projects, endpoints, apiKeys, usageLogs, otpCodes] =
@@ -141,9 +141,9 @@ const logDatabaseStats = async (): Promise<void> => {
   }
 };
 
-// ============================================================================
+
 // Initialize All Cron Jobs
-// ============================================================================
+
 export const initializeCleanupJobs = (): void => {
   if (env.NODE_ENV === "test") {
     logger.info("Skipping cron jobs in test environment");
@@ -182,9 +182,9 @@ export const initializeCleanupJobs = (): void => {
   logger.info("Cleanup jobs initialized");
 };
 
-// ============================================================================
+
 // Manual Cleanup Functions (for admin endpoints or CLI)
-// ============================================================================
+
 export const runAllCleanups = async (): Promise<{
   otps: number;
   logs: number;

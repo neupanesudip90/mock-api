@@ -49,10 +49,10 @@ COPY --from=builder --chown=appuser:appgroup /app/.next/static ./.next/static
 
 USER appuser
 
-EXPOSE 30001
+EXPOSE 30000
 
 # Ensure Next.js listens on all interfaces
 ENV HOSTNAME="0.0.0.0"
-ENV PORT=30001
+
 
 CMD ["node", "server.js"]

@@ -1,4 +1,3 @@
-// src/utils/mockGenerator.ts
 import { faker } from "@faker-js/faker";
 
 const fakerAliases: Record<string, string> = {

@@ -1,4 +1,3 @@
-// src/services/mock.service.ts
 import { prisma } from "@/config/database";
 import { ApiError } from "@/utils/ApiError";
 import { generateMockData } from "@/utils/mockGenerator";
@@ -22,9 +21,8 @@ export interface UsageLogData {
   rateLimitHit: boolean;
 }
 
-// ============================================================================
+
 // Find Matching Endpoint
-// ============================================================================
 export const findMatchingEndpoint = async ({
   projectId,
   method,
@@ -73,9 +71,8 @@ export const findMatchingEndpoint = async ({
   return null;
 };
 
-// ============================================================================
+
 // Generate Mock Response
-// ============================================================================
 export const generateMockResponse = async (
   endpoint: any,
   params: Record<string, string>,
@@ -125,9 +122,8 @@ export const generateMockResponse = async (
   };
 };
 
-// ============================================================================
+
 // Log Usage
-// ============================================================================
 export const logUsage = async (data: UsageLogData): Promise<void> => {
   await prisma.usageLog.create({
     data: {

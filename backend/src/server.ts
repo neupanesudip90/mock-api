@@ -1,5 +1,6 @@
+import "module-alias/register";
 import app from "./app";
-import { env} from "@/config/env";
+import { env } from "@/config/env";
 import { logger } from "@/utils/logger";
 import { prisma } from "@/config/database";
 import { getRedisClient } from "@/config/redis.config";
@@ -23,11 +24,11 @@ const startServer = async () => {
   try {
     const redis = getRedisClient();
     await redis.connect();
-      await redis.ping();
+    await redis.ping();
   } catch (error) {
     logger.error("❌ Redis connection failed", { error });
     process.exit(1); // no point running if Redis is down
-  } 
+  }
   const server = app.listen(PORT, () => {
     logger.info(`🚀 Server running on port ${PORT} in ${env.NODE_ENV} mode`);
   });
@@ -44,7 +45,7 @@ const startServer = async () => {
       await closeEmailTransporter();
 
       logger.info("All connections closed. Exiting now.");
-      
+
       process.exit(0);
     });
   };

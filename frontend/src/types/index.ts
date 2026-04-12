@@ -1,6 +1,6 @@
-// ============================================================================
+
 // Auth Types
-// ============================================================================
+
 export interface User {
   id: string;
   email: string;
@@ -43,9 +43,9 @@ export interface ResetPasswordPayload {
   newPassword: string;
 }
 
-// ============================================================================
+
 // Project Types
-// ============================================================================
+
 export type ProjectStatus = "ACTIVE" | "INACTIVE" | "ARCHIVED";
 export type RateLimitStrategy =
   | "FIXED_WINDOW"
@@ -92,9 +92,9 @@ export interface UpdateProjectPayload {
   defaultRateLimitStrategy?: RateLimitStrategy;
 }
 
-// ============================================================================
+
 // Endpoint Types
-// ============================================================================
+
 export interface Endpoint {
   id: string;
   projectId: string;
@@ -135,9 +135,9 @@ export interface UpdateEndpointPayload {
   rateLimitWindow?: number;
 }
 
-// ============================================================================
+
 // API Key Types
-// ============================================================================
+
 export interface ApiKey {
   id: string;
   projectId: string;
@@ -157,9 +157,9 @@ export interface CreateApiKeyPayload {
   name: string;
 }
 
-// ============================================================================
+
 // Analytics Types
-// ============================================================================
+
 export interface UsageSummary {
   totalRequests: number;
   successfulRequests: number;
@@ -197,9 +197,9 @@ export interface Analytics {
   };
 }
 
-// ============================================================================
+
 // API Response Types
-// ============================================================================
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

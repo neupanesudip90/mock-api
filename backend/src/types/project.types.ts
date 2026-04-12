@@ -1,8 +1,7 @@
 import { ProjectStatus, RateLimitStrategy } from "@/generated/client";
 
-// ============================================================================
+
 // Input Types
-// ============================================================================
 export interface CreateProjectInput {
   name: string;
   description?: string;
@@ -20,9 +19,8 @@ export interface UpdateProjectInput {
   defaultRateLimitStrategy?: RateLimitStrategy;
 }
 
-// ============================================================================
+
 // Response Types
-// ============================================================================
 export interface ProjectResponse {
   id: string;
   name: string;

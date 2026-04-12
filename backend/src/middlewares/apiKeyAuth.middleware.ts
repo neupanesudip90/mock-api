@@ -15,10 +15,9 @@ declare global {
   }
 }
 
-// ============================================================================
+
 // API Key Authentication Middleware
 // Used for public mock endpoint access (not user dashboard)
-// ============================================================================
 export const apiKeyAuth = async (
   req: Request,
   res: Response,
@@ -52,9 +51,8 @@ export const apiKeyAuth = async (
   }
 };
 
-// ============================================================================
+
 // Optional API Key (doesn't fail if missing, but validates if present)
-// ============================================================================
 export const optionalApiKeyAuth = async (
   req: Request,
   res: Response,

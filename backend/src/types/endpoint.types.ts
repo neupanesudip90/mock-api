@@ -1,8 +1,7 @@
 import { HttpMethod, RateLimitStrategy } from "@/generated/client";
 
-// ============================================================================
+
 // Input Types
-// ============================================================================
 export interface CreateEndpointInput {
   path: string;
   method: HttpMethod;
@@ -27,9 +26,8 @@ export interface UpdateEndpointInput {
   rateLimitWindow?: number;
 }
 
-// ============================================================================
+
 // Response Types
-// ============================================================================
 export interface EndpointResponse {
   id: string;
   projectId: string;

@@ -5,9 +5,8 @@ import { logger } from "@/utils/logger";
 const FROM_ADDRESS = `"MockAPI Gateway" <${env.EMAIL_FROM}>`;
 const APP_URL = env.APP_URL; // e.g. https://yourdomain.com
 
-// ============================================================================
+
 // Email Verification
-// ============================================================================
 export const sendVerificationEmail = async (
   email: string,
   name: string | null,
@@ -80,9 +79,8 @@ export const sendPasswordResetEmail = async (
   }
 };
 
-// ============================================================================
+
 // Password Changed Notification
-// ============================================================================
 export const sendPasswordChangedEmail = async (
   email: string,
   name: string | null,

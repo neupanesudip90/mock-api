@@ -3,9 +3,8 @@ import * as projectService from "@/services/project.service";
 import type { ListProjectsQuery } from "@/validators/project.validator";
 import { ApiError } from "@/utils/ApiError";
 
-// ============================================================================
+
 // Helper: Get User ID
-// ============================================================================
 const getUserId = (req: Request): string => {
   if (!req.user?.userId) {
     throw new ApiError(401, "Authentication required");
@@ -13,9 +12,8 @@ const getUserId = (req: Request): string => {
   return req.user.userId;
 };
 
-// ============================================================================
+
 // Create Project
-// ============================================================================
 export const createProject = async (
   req: Request,
   res: Response,
@@ -35,7 +33,7 @@ export const createProject = async (
   }
 };
 
-// ============================================================================
+
 // List Projects
 export const listProjects = async (
   req: Request,
@@ -60,9 +58,8 @@ export const listProjects = async (
   }
 };
 
-// ============================================================================
+
 // Get Project
-// ============================================================================
 export const getProject = async (
   req: Request,
   res: Response,
@@ -81,9 +78,8 @@ export const getProject = async (
   }
 };
 
-// ============================================================================
+
 // Update Project
-// ============================================================================
 export const updateProject = async (
   req: Request,
   res: Response,
@@ -107,9 +103,8 @@ export const updateProject = async (
   }
 };
 
-// ============================================================================
+
 // Delete Project
-// ============================================================================
 export const deleteProject = async (
   req: Request,
   res: Response,

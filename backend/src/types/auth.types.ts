@@ -1,8 +1,7 @@
 import { Request } from "express";
 
-// ============================================================================
+
 // JWT
-// ============================================================================
 export interface JwtPayload {
   userId: string;
   email: string;
@@ -14,9 +13,8 @@ export interface RefreshTokenPayload extends JwtPayload {
   tokenVersion: number; // increments on logout to invalidate old tokens
 }
 
-// ============================================================================
+
 // Express Augmentation
-// ============================================================================
 declare global {
   namespace Express {
     interface Request {
@@ -33,18 +31,16 @@ declare global {
     }
   }
 }
-// ============================================================================
+
 // Auth Tokens
-// ============================================================================
 export interface AuthTokens {
   accessToken: string;
   expiresIn: number;
   // refresh token goes in httpOnly cookie — not in response body
 }
 
-// ============================================================================
+
 // Input Types
-// ============================================================================
 export interface RegisterInput {
   email: string;
   password: string;
@@ -74,9 +70,8 @@ export interface VerifyEmailInput {
   otp: string;
 }
 
-// ============================================================================
+
 // Response Types
-// ============================================================================
 export interface AuthResponse {
   user: {
     id: string;

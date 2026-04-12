@@ -29,9 +29,8 @@ import type {
   ChangePasswordInput,
 } from "@/types/auth.types";
 
-// ============================================================================
+
 // Helpers
-// ============================================================================
 const buildAuthResponse = async (user: {
   id: string;
   email: string;
@@ -66,9 +65,8 @@ const buildAuthResponse = async (user: {
   };
 };
 
-// ============================================================================
+
 // Register
-// ============================================================================
 export const registerUser = async (
   input: RegisterInput,
 ): Promise<{ response: AuthResponse; refreshToken: string }> => {
@@ -123,12 +121,8 @@ export const registerUser = async (
   return buildAuthResponse(user);
 };
 
-// ============================================================================
-// Email Verification
-// ============================================================================
-// src/services/auth.service.ts
 
-// src/services/auth.service.ts
+// Email Verification
 export const verifyEmail = async (payload: {
   email: string;
   code: string;
@@ -194,9 +188,8 @@ export const verifyEmail = async (payload: {
 
   console.log("✅ Email verification completed successfully");
 };
-// ==========================================================================
+
 // Resend Verification Email
-// ============================================================================
 export const resendVerificationEmail = async (email: string): Promise<void> => {
   const cleanEmail = email.toLowerCase().trim();
 
@@ -231,14 +224,9 @@ export const resendVerificationEmail = async (email: string): Promise<void> => {
     },
   });
 
-  // TODO: Send email with the code (implement your email service here)
-  console.log(`Verification code for ${cleanEmail}: ${code}`); // Remove in production
-
-  // In production, call your email service here
 };
-// ============================================================================
+
 // Login
-// ============================================================================
 export const loginUser = async (
   input: LoginInput,
 ): Promise<{ response: AuthResponse; refreshToken: string }> => {
@@ -253,9 +241,8 @@ export const loginUser = async (
   return buildAuthResponse(user);
 };
 
-// ============================================================================
+
 // Refresh Access Token
-// ============================================================================
 export const refreshAccessToken = async (
   refreshToken: string,
 ): Promise<{ accessToken: string; expiresIn: number }> => {
@@ -279,9 +266,8 @@ export const refreshAccessToken = async (
   return { accessToken, expiresIn: 900 };
 };
 
-// ============================================================================
+
 // Logout
-// ============================================================================
 export const logoutUser = async (userId: string): Promise<void> => {
   await prisma.user.update({
     where: { id: userId },
@@ -289,9 +275,8 @@ export const logoutUser = async (userId: string): Promise<void> => {
   });
 };
 
-// ============================================================================
+
 // Forgot Password
-// ============================================================================
 export const forgotPassword = async (
   input: ForgotPasswordInput,
 ): Promise<void> => {
@@ -324,9 +309,8 @@ export const forgotPassword = async (
   await sendPasswordResetEmail(user.email, user.name, otp);
 };
 
-// ============================================================================
+
 // Reset Password
-// ============================================================================
 export const resetPassword = async (
   input: ResetPasswordInput,
 ): Promise<void> => {
@@ -370,9 +354,8 @@ export const resetPassword = async (
   if (user) await sendPasswordChangedEmail(user.email, user.name);
 };
 
-// ============================================================================
+
 // Change Password
-// ============================================================================
 export const changePassword = async (
   userId: string,
   input: ChangePasswordInput,

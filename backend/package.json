@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc && tsc-alias",
+    "build": "tsc && cp -r src/generated dist/generated",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
@@ -41,6 +41,7 @@
     "install": "^0.13.0",
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
+    "module-alias": "^2.3.4",
     "morgan": "^1.10.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.4",
@@ -48,6 +49,7 @@
     "path-to-regexp": "^8.4.2",
     "pg": "^8.20.0",
     "rate-limiter-flexible": "^11.0.0",
+    "tsconfig-paths": "^4.2.0",
     "winston": "^3.19.0",
     "zod": "^4.3.6"
   },
@@ -67,9 +69,12 @@
     "dotenv-cli": "^11.0.0",
     "prisma": "^7.7.0",
     "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.3"
+    "typescript": "^5.5.4"
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
+  },
+   "_moduleAliases": {
+    "@": "./dist"
   }
 }

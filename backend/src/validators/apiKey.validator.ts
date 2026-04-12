@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-// ============================================================================
+
 // Create API Key
-// ============================================================================
 export const createApiKeySchema = z.object({
   params: z.object({
     projectId: z.string().uuid("Invalid project ID"),
@@ -16,9 +15,8 @@ export const createApiKeySchema = z.object({
   }),
 });
 
-// ============================================================================
+
 // Update API Key
-// ============================================================================
 export const updateApiKeySchema = z.object({
   params: z.object({
     projectId: z.string().uuid("Invalid project ID"),
@@ -39,9 +37,8 @@ export const updateApiKeySchema = z.object({
     }),
 });
 
-// ============================================================================
+
 // List API Keys
-// ============================================================================
 export const listApiKeysSchema = z.object({
   params: z.object({
     projectId: z.string().uuid("Invalid project ID"),
@@ -55,9 +52,8 @@ export const listApiKeysSchema = z.object({
   }),
 });
 
-// ============================================================================
+
 // Delete/Rotate API Key
-// ============================================================================
 export const apiKeyParamsSchema = z.object({
   params: z.object({
     projectId: z.string().uuid("Invalid project ID"),
@@ -65,8 +61,7 @@ export const apiKeyParamsSchema = z.object({
   }),
 });
 
-// ============================================================================
+
 // Type Exports
-// ============================================================================
 export type CreateApiKeyBody = z.infer<typeof createApiKeySchema>["body"];
 export type UpdateApiKeyBody = z.infer<typeof updateApiKeySchema>["body"];

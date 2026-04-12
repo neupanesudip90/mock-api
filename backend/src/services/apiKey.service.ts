@@ -11,14 +11,14 @@ import type {
   ValidatedApiKey,
 } from "@/types/apiKey.types";
 
-// ============================================================================
+
 // Constants
-// ============================================================================
+
 const MAX_API_KEYS_PER_PROJECT = 10;
 
-// ============================================================================
+
 // Helpers
-// ============================================================================
+
 const formatApiKey = (key: any): ApiKeyResponse => ({
   id: key.id,
   projectId: key.projectId,
@@ -30,9 +30,8 @@ const formatApiKey = (key: any): ApiKeyResponse => ({
   updatedAt: key.updatedAt,
 });
 
-// ============================================================================
+
 // Create API Key
-// ============================================================================
 export const createApiKey = async (
   userId: string,
   projectId: string,
@@ -81,9 +80,8 @@ export const createApiKey = async (
   };
 };
 
-// ============================================================================
+
 // List API Keys
-// ============================================================================
 export const listApiKeys = async (
   userId: string,
   projectId: string,
@@ -108,9 +106,8 @@ export const listApiKeys = async (
   };
 };
 
-// ============================================================================
+
 // Get Single API Key
-// ============================================================================
 export const getApiKey = async (
   userId: string,
   projectId: string,
@@ -130,9 +127,8 @@ export const getApiKey = async (
   return formatApiKey(apiKey);
 };
 
-// ============================================================================
+
 // Update API Key
-// ============================================================================
 export const updateApiKey = async (
   userId: string,
   projectId: string,
@@ -178,9 +174,8 @@ export const updateApiKey = async (
   return formatApiKey(updated);
 };
 
-// ============================================================================
+
 // Revoke (Delete) API Key
-// ============================================================================
 export const revokeApiKey = async (
   userId: string,
   projectId: string,
@@ -202,9 +197,8 @@ export const revokeApiKey = async (
   });
 };
 
-// ============================================================================
+
 // Rotate API Key (Delete old + Create new with same name)
-// ============================================================================
 export const rotateApiKey = async (
   userId: string,
   projectId: string,
@@ -246,9 +240,8 @@ export const rotateApiKey = async (
   };
 };
 
-// ============================================================================
+
 // Validate API Key (for public endpoint access)
-// ============================================================================
 export const validateApiKey = async (
   plainKey: string,
 ): Promise<ValidatedApiKey | null> => {

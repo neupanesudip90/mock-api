@@ -8,9 +8,8 @@ import type {
   AnalyticsQuery,
 } from "@/types/analytics.types";
 
-// ============================================================================
+
 // Get Usage Summary
-// ============================================================================
 const getUsageSummary = async (
   projectId: string,
   startDate: Date,
@@ -70,9 +69,8 @@ const getUsageSummary = async (
   };
 };
 
-// ============================================================================
+
 // Get Endpoint Stats
-// ============================================================================
 const getEndpointStats = async (
   projectId: string,
   startDate: Date,
@@ -130,9 +128,8 @@ const getEndpointStats = async (
   return stats.sort((a, b) => b.totalRequests - a.totalRequests);
 };
 
-// ============================================================================
+
 // Get Time Series Data
-// ============================================================================
 const getTimeSeries = async (
   projectId: string,
   startDate: Date,
@@ -177,9 +174,8 @@ const getTimeSeries = async (
   }));
 };
 
-// ============================================================================
+
 // Get Top IPs
-// ============================================================================
 const getTopIPs = async (
   projectId: string,
   startDate: Date,
@@ -204,9 +200,8 @@ const getTopIPs = async (
   }));
 };
 
-// ============================================================================
+
 // Main Analytics Function
-// ============================================================================
 export const getProjectAnalytics = async (
   userId: string,
   projectId: string,
@@ -237,9 +232,8 @@ export const getProjectAnalytics = async (
   };
 };
 
-// ============================================================================
+
 // Single Endpoint Analytics
-// ============================================================================
 export const getEndpointAnalytics = async (
   userId: string,
   projectId: string,

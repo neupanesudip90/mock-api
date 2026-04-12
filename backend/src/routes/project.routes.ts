@@ -18,9 +18,8 @@ const router = Router();
 // All routes require authentication
 router.use(requireAuth);
 
-// ============================================================================
+
 // Project CRUD
-// ============================================================================
 router.post(
   "/",
   validate(createProjectSchema),
@@ -47,9 +46,8 @@ router.delete(
   projectController.deleteProject,
 );
 
-// ============================================================================
+
 // Mount API Key routes under /projects/:projectId/api-keys
-// ============================================================================
 router.use("/:projectId/api-keys", apiKeyRoutes);
 
 router.use("/:projectId/endpoints", endpointRoutes);

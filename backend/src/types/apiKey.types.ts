@@ -1,6 +1,5 @@
-// ============================================================================
+
 // Input Types
-// ============================================================================
 export interface CreateApiKeyInput {
   name: string;
 }
@@ -10,9 +9,8 @@ export interface UpdateApiKeyInput {
   isActive?: boolean;
 }
 
-// ============================================================================
+
 // Response Types
-// ============================================================================
 export interface ApiKeyResponse {
   id: string;
   projectId: string;
@@ -33,9 +31,8 @@ export interface ApiKeyListResponse {
   total: number;
 }
 
-// ============================================================================
+
 // Validation Result (for middleware)
-// ============================================================================
 export interface ValidatedApiKey {
   keyId: string;
   projectId: string;
