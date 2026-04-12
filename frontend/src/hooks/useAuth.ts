@@ -62,13 +62,20 @@ export function useAuth() {
         "/auth/verify-email",
         payload,
       );
-      return response.data.data; // <-- extract .data.data like login does
+      return response.data.data;
     },
 
     onSuccess: (data) => {
-      setUser(data.user);
-      setToken(data.tokens.accessToken);
-      setIsVerified?.(true);
+      console.log("verify response:", data);
+      if (data?.user && data?.tokens) {
+        setUser(data.user);
+        setToken(data.tokens.accessToken);
+        setIsVerified?.(true);
+        router.push("/dashboard");
+      } else {
+        // backend doesn't return tokens on verify, send to login
+        router.push("/login");
+      }
 
       toast({
         variant: "success",
