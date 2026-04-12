@@ -6,7 +6,6 @@ import { prisma } from "@/config/database";
 import { getRedisClient } from "@/config/redis.config";
 import { initializeCleanupJobs } from "@/jobs/cleanup.job";
 import { closeRedisConnection } from "@/config/redis.config";
-import { closeEmailTransporter } from "@/config/email.config";
 
 const PORT = parseInt(env.PORT, 10);
 
@@ -41,9 +40,6 @@ const startServer = async () => {
       logger.info("Database connection closed.");
 
       await closeRedisConnection();
-
-      await closeEmailTransporter();
-
       logger.info("All connections closed. Exiting now.");
 
       process.exit(0);
