@@ -23,7 +23,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().optional(),
   // Logging
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
-  // Brevo
+  // Brevo api key
   BREVO_API_KEY: z.string().min(1),
 });
 
