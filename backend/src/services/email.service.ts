@@ -13,7 +13,7 @@ export const sendVerificationEmail = async (
 ): Promise<void> => {
   const displayName = name ?? email;
 
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
     subject: "Your verification code — MockAPI Gateway",
@@ -34,9 +34,12 @@ export const sendVerificationEmail = async (
     `,
   });
 
-  if (env.NODE_ENV === "development") {
-    logger.info(`OTP for ${email}: ${otp}`);
+  if (error) {
+    logger.error(`Failed to send verification email: ${JSON.stringify(error)}`);
+    throw new Error(error.message);
   }
+
+  logger.info(`Verification email sent to ${email}, id: ${data?.id}`);
 };
 
 // Password Reset
@@ -47,7 +50,7 @@ export const sendPasswordResetEmail = async (
 ): Promise<void> => {
   const displayName = name ?? email;
 
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
     subject: "Your password reset code — MockAPI Gateway",
@@ -67,6 +70,15 @@ export const sendPasswordResetEmail = async (
       </div>
     `,
   });
+
+  if (error) {
+    logger.error(
+      `Failed to send password reset email: ${JSON.stringify(error)}`,
+    );
+    throw new Error(error.message);
+  }
+
+  logger.info(`Password reset email sent to ${email}, id: ${data?.id}`);
 };
 
 // Password Changed Notification
@@ -76,7 +88,7 @@ export const sendPasswordChangedEmail = async (
 ): Promise<void> => {
   const displayName = name ?? email;
 
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
     subject: "Your password was changed — MockAPI Gateway",
@@ -89,4 +101,13 @@ export const sendPasswordChangedEmail = async (
       </div>
     `,
   });
+
+  if (error) {
+    logger.error(
+      `Failed to send password changed email: ${JSON.stringify(error)}`,
+    );
+    throw new Error(error.message);
+  }
+
+  logger.info(`Password changed email sent to ${email}, id: ${data?.id}`);
 };
