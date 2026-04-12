@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HttpMethod, RateLimitStrategy } from "@/generated/client";
+import { HttpMethod, RateLimitStrategy } from "../generated/client";
 
 const HttpMethodEnum = z.enum(
   Object.values(HttpMethod) as [string, ...string[]],

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ProjectStatus, RateLimitStrategy } from "@/generated/client";
+import { ProjectStatus, RateLimitStrategy } from "../generated/client";
 
 
 // Create Project
