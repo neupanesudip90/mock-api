@@ -127,7 +127,7 @@ export const verifyEmail = async (payload: {
   email: string;
   code: string;
   type?: string;
-}): Promise<void> => {
+}): Promise<{ response: AuthResponse; refreshToken: string }> => {
   const { email, code, type = "EMAIL_VERIFICATION" } = payload;
   const cleanCode = code.trim();
 
@@ -154,7 +154,6 @@ export const verifyEmail = async (payload: {
     },
   });
 
-
   if (!otpRecord) {
     // Show all OTPs for this user to see what's actually in DB
     const allOtps = await prisma.otpCode.findMany({
@@ -163,14 +162,17 @@ export const verifyEmail = async (payload: {
       take: 10,
     });
 
-    console.log("All OTPs for this user:", allOtps.map(o => ({
-      id: o.id,
-      code: o.code,
-      type: o.type,
-      expiresAt: o.expiresAt,
-      usedAt: o.usedAt,
-      createdAt: o.createdAt,
-    })));
+    console.log(
+      "All OTPs for this user:",
+      allOtps.map((o) => ({
+        id: o.id,
+        code: o.code,
+        type: o.type,
+        expiresAt: o.expiresAt,
+        usedAt: o.usedAt,
+        createdAt: o.createdAt,
+      })),
+    );
 
     throw new ApiError(400, "Invalid or expired OTP");
   }
@@ -185,9 +187,11 @@ export const verifyEmail = async (payload: {
       data: { emailVerified: true },
     }),
   ]);
-
+  // return tokens just like login does
+  const updatedUser = { ...user, emailVerified: true };
+  return buildAuthResponse(updatedUser);
   console.log("✅ Email verification completed successfully");
-};
+};;
 
 // Resend Verification Email
 export const resendVerificationEmail = async (email: string): Promise<void> => {

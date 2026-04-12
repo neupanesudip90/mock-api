@@ -25,17 +25,29 @@ export const register = async (
   }
 };
 
-export const verifyEmailController = async (req: Request, res: Response) => {
-  const { email, code, type } = req.body;
+// export const verifyEmailController = async (req: Request, res: Response) => {
+//   const { email, code, type } = req.body;
 
-  if (!email || !code) {
-    throw new ApiError(400, "Email and code are required");
+//   if (!email || !code) {
+//     throw new ApiError(400, "Email and code are required");
+//   }
+
+//   await authService.verifyEmail({ email, code, type });
+//   res
+//     .status(200)
+//     .json({ success: true, message: "Email verified successfully" });
+// };
+export const verifyEmailController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, code, type } = req.body;
+    if (!email || !code) throw new ApiError(400, "Email and code are required");
+
+    const { response, refreshToken } = await authService.verifyEmail({ email, code, type });
+    res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
+    res.status(200).json({ success: true, data: response });
+  } catch (err) {
+    next(err);
   }
-
-  await authService.verifyEmail({ email, code, type });
-  res
-    .status(200)
-    .json({ success: true, message: "Email verified successfully" });
 };
 
 export const resendVerification = async (
