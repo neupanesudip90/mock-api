@@ -70,6 +70,8 @@ export function VerifyEmailForm({ email }: { email?: string }) {
       code: cleanCode,
       type: "EMAIL_VERIFICATION",
     };
+
+    console.log("Sending verify email payload:", payload);
     verifyEmail.mutate(payload);
   };
 
