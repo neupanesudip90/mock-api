@@ -2,14 +2,25 @@ import * as Brevo from "@getbrevo/brevo";
 import { env } from "@/config/env";
 import { logger } from "@/utils/logger";
 
-const apiInstance = new Brevo.TransactionalEmailsApi();
+// ✅ FIX: access via `.default`
+const brevo = Brevo.default;
+
+// ✅ API instance
+const apiInstance = new brevo.TransactionalEmailsApi();
+
 apiInstance.setApiKey(
-  Brevo.TransactionalEmailsApiApiKeys.apiKey,
+  brevo.TransactionalEmailsApiApiKeys.apiKey,
   env.BREVO_API_KEY,
 );
 
-const FROM = { email: env.EMAIL_FROM, name: "MockAPI Gateway" };
+const FROM = {
+  email: env.EMAIL_FROM,
+  name: "MockAPI Gateway",
+};
 
+// ============================================================================
+// Send Verification Email
+// ============================================================================
 export const sendVerificationEmail = async (
   email: string,
   name: string | null,
@@ -17,7 +28,7 @@ export const sendVerificationEmail = async (
 ): Promise<void> => {
   const displayName = name ?? email;
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  const sendSmtpEmail = new brevo.SendSmtpEmail();
   sendSmtpEmail.to = [{ email }];
   sendSmtpEmail.sender = FROM;
   sendSmtpEmail.subject = "Your verification code — MockAPI Gateway";
@@ -46,6 +57,9 @@ export const sendVerificationEmail = async (
   }
 };
 
+// ============================================================================
+// Send Password Reset Email
+// ============================================================================
 export const sendPasswordResetEmail = async (
   email: string,
   name: string | null,
@@ -53,7 +67,7 @@ export const sendPasswordResetEmail = async (
 ): Promise<void> => {
   const displayName = name ?? email;
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  const sendSmtpEmail = new brevo.SendSmtpEmail();
   sendSmtpEmail.to = [{ email }];
   sendSmtpEmail.sender = FROM;
   sendSmtpEmail.subject = "Your password reset code — MockAPI Gateway";
@@ -84,13 +98,16 @@ export const sendPasswordResetEmail = async (
   }
 };
 
+// ============================================================================
+// Send Password Changed Email
+// ============================================================================
 export const sendPasswordChangedEmail = async (
   email: string,
   name: string | null,
 ): Promise<void> => {
   const displayName = name ?? email;
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  const sendSmtpEmail = new brevo.SendSmtpEmail();
   sendSmtpEmail.to = [{ email }];
   sendSmtpEmail.sender = FROM;
   sendSmtpEmail.subject = "Your password was changed — MockAPI Gateway";
