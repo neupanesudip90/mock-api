@@ -15,8 +15,6 @@ const envSchema = z.object({
   // JWT
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
-  // Resend
-  RESEND_API_KEY: z.string().min(1),
   // Email
   EMAIL_FROM: z.string(),
   // Redis
