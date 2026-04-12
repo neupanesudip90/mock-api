@@ -1,10 +1,9 @@
-import { getEmailTransporter } from "@/config/email.config";
+import { Resend } from "resend";
 import { env } from "@/config/env";
 import { logger } from "@/utils/logger";
 
-const FROM_ADDRESS = `"MockAPI Gateway" <${env.EMAIL_FROM}>`;
-const APP_URL = env.APP_URL; // e.g. https://yourdomain.com
-
+const resend = new Resend(env.RESEND_API_KEY);
+const FROM_ADDRESS = `MockAPI Gateway <onboarding@resend.dev>`;
 
 // Email Verification
 export const sendVerificationEmail = async (
@@ -13,9 +12,8 @@ export const sendVerificationEmail = async (
   otp: string,
 ): Promise<void> => {
   const displayName = name ?? email;
-  const transporter = await getEmailTransporter();
 
-  const info = await transporter.sendMail({
+  await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
     subject: "Your verification code — MockAPI Gateway",
@@ -37,21 +35,19 @@ export const sendVerificationEmail = async (
   });
 
   if (env.NODE_ENV === "development") {
-    const nodemailer = await import("nodemailer");
-    logger.info(`OTP for ${email}: ${otp}`); // ← logs OTP directly in terminal
-    logger.info(`Preview email: ${nodemailer.getTestMessageUrl(info)}`);
+    logger.info(`OTP for ${email}: ${otp}`);
   }
 };
 
+// Password Reset
 export const sendPasswordResetEmail = async (
   email: string,
   name: string | null,
   otp: string,
 ): Promise<void> => {
   const displayName = name ?? email;
-  const transporter = await getEmailTransporter();
 
-  const info = await transporter.sendMail({
+  await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
     subject: "Your password reset code — MockAPI Gateway",
@@ -71,14 +67,7 @@ export const sendPasswordResetEmail = async (
       </div>
     `,
   });
-
-  if (env.NODE_ENV === "development") {
-    const nodemailer = await import("nodemailer");
-    logger.info(`OTP for ${email}: ${otp}`); // ← logs OTP directly in terminal
-    logger.info(`Preview email: ${nodemailer.getTestMessageUrl(info)}`);
-  }
 };
-
 
 // Password Changed Notification
 export const sendPasswordChangedEmail = async (
@@ -86,9 +75,8 @@ export const sendPasswordChangedEmail = async (
   name: string | null,
 ): Promise<void> => {
   const displayName = name ?? email;
-  const transporter = await getEmailTransporter();
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
     subject: "Your password was changed — MockAPI Gateway",
