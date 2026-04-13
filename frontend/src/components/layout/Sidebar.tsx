@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,7 +12,7 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  Plus,
+  X,
 } from "lucide-react";
 
 interface NavItem {
@@ -32,17 +31,17 @@ const bottomNavItems: NavItem[] = [
   { label: "Help", href: "/help", icon: HelpCircle },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-card transition-all duration-300",
-        collapsed ? "w-[70px]" : "w-[260px]",
-      )}
-    >
+  const navContent = (
+    <>
       {/* Header */}
       <div
         className={cn(
@@ -51,23 +50,33 @@ export function Sidebar() {
         )}
       >
         <Logo iconOnly={collapsed} size={collapsed ? "sm" : "md"} />
+        {/* Desktop collapse button */}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className={cn("h-8 w-8", collapsed && "hidden")}
+          className={cn("h-8 w-8 hidden md:flex", collapsed && "hidden")}
         >
           <ChevronLeft className="h-4 w-4" />
+        </Button>
+        {/* Mobile close button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onMobileClose}
+          className="h-8 w-8 md:hidden"
+        >
+          <X className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Main Nav */}
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-1 px-3 pt-3">
         {mainNavItems.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} onClick={onMobileClose}>
               <span
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
@@ -90,7 +99,7 @@ export function Sidebar() {
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} onClick={onMobileClose}>
               <span
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
@@ -107,18 +116,44 @@ export function Sidebar() {
           );
         })}
 
-        {/* Collapse Toggle for collapsed state */}
         {collapsed && (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(false)}
-            className="mt-2 h-8 w-8 mx-auto flex"
+            className="mt-2 h-8 w-8 mx-auto hidden md:flex"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         )}
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile overlay backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onMobileClose}
+        />
+      )}
+
+      {/* Sidebar panel */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-card transition-all duration-300",
+          // Desktop: collapsible
+          "md:translate-x-0",
+          collapsed ? "md:w-[70px]" : "md:w-[260px]",
+          // Mobile: drawer — slide in/out
+          "w-[260px]",
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        )}
+      >
+        {navContent}
+      </aside>
+    </>
   );
 }

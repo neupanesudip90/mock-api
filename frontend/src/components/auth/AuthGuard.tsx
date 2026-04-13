@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -12,21 +11,28 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+
+  // Read token synchronously during render — safe in a "use client" component
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+
+  // Store hasn't hydrated yet but token exists — wait for it
+  const isHydrating = !isAuthenticated && !!token;
 
   useEffect(() => {
-    // Check if we have a token but no user (page refresh)
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-
     if (!isAuthenticated && !token) {
-      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
+      router.replace(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
     }
-  }, [isAuthenticated, router, pathname]);
+  }, [isAuthenticated, token, router, pathname]);
 
-  if (!isAuthenticated) {
+  // Definitively not logged in — redirect in flight
+  if (!isAuthenticated && !token) {
+    return <LoadingPage />;
+  }
+
+  // Token exists but Zustand hasn't rehydrated yet — hold on
+  if (isHydrating) {
     return <LoadingPage />;
   }
 

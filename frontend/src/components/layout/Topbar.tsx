@@ -16,14 +16,28 @@ import { Bell, Search, LogOut, User, Settings, Moon, Sun } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "next-themes";
+import { Menu } from "lucide-react";
 
-export function Topbar() {
+  interface TopbarProps {
+    onMobileMenuClick: () => void;
+  }
+
+export function Topbar({ onMobileMenuClick }: TopbarProps){
   const { user } = useAuthStore();
   const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onMobileMenuClick}
+        className="md:hidden"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
       {/* Search */}
       <div className="flex items-center gap-4 flex-1 max-w-md">
         <div className="relative w-full">

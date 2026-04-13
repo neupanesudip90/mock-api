@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -8,11 +9,20 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="pl-[260px]">
-        <Topbar />
+      <Sidebar
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
+      {/* 
+        On mobile: no left padding (sidebar is an overlay)
+        On desktop: pad by sidebar width
+      */}
+      <div className="md:pl-[260px]">
+        <Topbar onMobileMenuClick={() => setMobileOpen(true)} />
         <main className="p-6">{children}</main>
       </div>
     </div>
