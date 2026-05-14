@@ -189,28 +189,30 @@ export function useAuth() {
     },
   });
 
-  //  LOGOUT
+  // LOGOUT
   const logout = useMutation({
     mutationFn: async () => {
       await api.post("/auth/logout");
     },
-
     onSuccess: () => {
+      // 1. Clear store and cookie FIRST
       storeLogout();
       queryClient.clear();
+      document.cookie = "auth-storage=; path=/; max-age=0"; // ← moved up
+
+      // 2. Navigate only after cookie is gone
       router.push("/login");
-      // clear cookie
-      document.cookie = "auth-storage=; path=/; max-age=0";
+
       toast({
         variant: "info",
         title: "Logged out",
         description: "You've been logged out successfully.",
       });
     },
-
     onError: () => {
       storeLogout();
       queryClient.clear();
+      document.cookie = "auth-storage=; path=/; max-age=0";
       router.push("/login");
     },
   });
