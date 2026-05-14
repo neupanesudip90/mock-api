@@ -95,20 +95,22 @@ export function useAuth() {
       );
       return response.data.data;
     },
-
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setUser(data.user);
       setToken(data.tokens.accessToken);
       setIsVerified?.(true);
-
+      await fetch("/api/auth/set-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: data.tokens.accessToken }),
+      });
       toast({
         variant: "success",
         title: "Welcome back!",
         description: "You've successfully logged in.",
       });
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     },
-
     onError: (error: any) => {
       toast({
         variant: "destructive",
@@ -193,16 +195,13 @@ export function useAuth() {
   const logout = useMutation({
     mutationFn: async () => {
       await api.post("/auth/logout");
+      await fetch("/api/auth/clear-session", { method: "POST" }); // ← correct URL
     },
     onSuccess: () => {
-      // 1. Clear store and cookie FIRST
       storeLogout();
       queryClient.clear();
-      document.cookie = "auth-storage=; path=/; max-age=0"; // ← moved up
-
-      // 2. Navigate only after cookie is gone
-      router.push("/login");
-
+      document.cookie = "auth-storage=; path=/; max-age=0";
+      window.location.href = "/login";
       toast({
         variant: "info",
         title: "Logged out",
@@ -213,7 +212,7 @@ export function useAuth() {
       storeLogout();
       queryClient.clear();
       document.cookie = "auth-storage=; path=/; max-age=0";
-      router.push("/login");
+      window.location.href = "/login"; // ← use window.location here too
     },
   });
 
