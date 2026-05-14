@@ -89,9 +89,6 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} MockAPI. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground">
-            Made with ❤️ for developers
-          </p>
         </div>
       </div>
     </footer>
